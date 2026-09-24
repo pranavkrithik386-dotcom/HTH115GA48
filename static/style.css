@@ -1915,4 +1915,1454 @@ input:focus-visible {
         2px solid var(--cyan);
 
     outline-offset: 3px;
-    
+}
+
+/* ============================================================
+   CAREER DEVELOPMENT PLAN
+   ============================================================ */
+
+.development-plan-card {
+    margin-top: 30px;
+    padding: 30px;
+    border-radius: 24px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(18, 25, 52, 0.96),
+            rgba(10, 15, 35, 0.98)
+        );
+    border: 1px solid rgba(110, 92, 255, 0.35);
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    overflow: hidden;
+    position: relative;
+}
+
+.development-plan-card::before {
+    content: "";
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: rgba(89, 71, 255, 0.12);
+    filter: blur(70px);
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   DEVELOPMENT HEADER
+   ============================================================ */
+
+.development-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 25px;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 1;
+}
+
+.development-header-left {
+    flex: 1;
+}
+
+.development-header h2 {
+    margin: 5px 0 8px;
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #ffffff;
+}
+
+.development-subtitle {
+    margin: 0;
+    max-width: 700px;
+    color: rgba(220, 225, 245, 0.72);
+    font-size: 14px;
+    line-height: 1.7;
+}
+
+.tech-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(96, 78, 255, 0.12);
+    border: 1px solid rgba(116, 101, 255, 0.32);
+    color: #a9a0ff;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+
+/* ============================================================
+   PROJECTED FIT BOX
+   ============================================================ */
+
+.projection-box {
+    min-width: 210px;
+    padding: 20px 22px;
+    border-radius: 20px;
+    text-align: center;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(27, 37, 78, 0.95),
+            rgba(13, 19, 43, 0.95)
+        );
+    border: 1px solid rgba(65, 226, 255, 0.28);
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.25);
+}
+
+.projection-label {
+    display: block;
+    margin-bottom: 5px;
+    color: rgba(210, 220, 245, 0.62);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+}
+
+.projection-score {
+    display: block;
+    font-size: 46px;
+    line-height: 1;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -2px;
+}
+
+.projection-improvement {
+    display: inline-block;
+    margin-top: 9px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(53, 211, 153, 0.12);
+    border: 1px solid rgba(53, 211, 153, 0.25);
+    color: #63e6b1;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+
+/* ============================================================
+   CURRENT → PROJECTED PROGRESS
+   ============================================================ */
+
+.fit-progress-section {
+    margin: 10px 0 30px;
+    padding: 20px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fit-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 15px;
+}
+
+.fit-progress-title {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.fit-progress-values {
+    color: rgba(220, 225, 245, 0.65);
+    font-size: 12px;
+}
+
+.fit-progress-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+    position: relative;
+}
+
+.fit-progress-current {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        #685cff,
+        #9a78ff
+    );
+    position: relative;
+    z-index: 2;
+    transition: width 0.8s ease;
+}
+
+.fit-progress-projected {
+    height: 100%;
+    border-radius: inherit;
+    background: rgba(77, 225, 255, 0.24);
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+}
+
+
+/* ============================================================
+   DEVELOPMENT GRID
+   ============================================================ */
+
+.development-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+
+/* ============================================================
+   SKILL CARD
+   ============================================================ */
+
+.development-skill {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+    min-height: 170px;
+    border-radius: 20px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 255, 255, 0.045),
+            rgba(255, 255, 255, 0.018)
+        );
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    transition:
+        transform 0.25s ease,
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+.development-skill:hover {
+    transform: translateY(-3px);
+    border-color: rgba(100, 216, 255, 0.35);
+    box-shadow:
+        0 12px 35px rgba(0, 0, 0, 0.25);
+}
+
+
+/* ============================================================
+   SKILL ORBIT / SYMBOL
+   ============================================================ */
+
+.skill-orbit {
+    width: 58px;
+    height: 58px;
+    min-width: 58px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    background:
+        conic-gradient(
+            #6d60ff 0deg,
+            #b076ff 130deg,
+            #4bdcff 240deg,
+            rgba(255, 255, 255, 0.08) 240deg,
+            rgba(255, 255, 255, 0.08) 360deg
+        );
+
+    box-shadow:
+        0 0 25px rgba(101, 89, 255, 0.2);
+}
+
+.skill-orbit::before {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    background: #11182f;
+}
+
+.skill-orbit span {
+    position: relative;
+    z-index: 2;
+    font-size: 17px;
+    font-weight: 900;
+    color: #ffffff;
+}
+
+
+/* ============================================================
+   SKILL CONTENT
+   ============================================================ */
+
+.development-skill-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.development-skill-title {
+    margin: 0 0 5px;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.development-skill-category {
+    display: inline-block;
+    margin-bottom: 10px;
+    color: rgba(160, 170, 205, 0.7);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+.development-skill-develop {
+    margin: 0 0 9px;
+    color: rgba(230, 235, 250, 0.82);
+    font-size: 13px;
+    line-height: 1.55;
+}
+
+.development-skill-reason {
+    margin: 0;
+    color: rgba(180, 190, 220, 0.58);
+    font-size: 11px;
+    line-height: 1.5;
+}
+
+
+/* ============================================================
+   STATUS BADGE
+   ============================================================ */
+
+.development-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(255, 183, 77, 0.10);
+    border: 1px solid rgba(255, 183, 77, 0.22);
+    color: #ffc56b;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+}
+
+
+/* ============================================================
+   DEVELOPMENT PROGRESS BAR
+   ============================================================ */
+
+.skill-progress {
+    margin-top: 13px;
+}
+
+.skill-progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+    color: rgba(200, 210, 235, 0.55);
+    font-size: 10px;
+}
+
+.skill-progress-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.07);
+    overflow: hidden;
+}
+
+.skill-progress-fill {
+    height: 100%;
+    width: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        #ffb84d,
+        #ffda7a
+    );
+    transition: width 0.7s ease;
+}
+
+
+/* ============================================================
+   REMAINING REQUIREMENTS
+   ============================================================ */
+
+.remaining-requirements {
+    margin-top: 28px;
+    padding: 22px;
+    border-radius: 20px;
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255, 174, 72, 0.055),
+            rgba(255, 255, 255, 0.018)
+        );
+    border: 1px solid rgba(255, 184, 77, 0.18);
+}
+
+.remaining-requirements-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.remaining-requirements-icon {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 11px;
+    background: rgba(255, 184, 77, 0.10);
+    border: 1px solid rgba(255, 184, 77, 0.2);
+    font-size: 16px;
+}
+
+.remaining-requirements h3 {
+    margin: 0;
+    color: #ffffff;
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.remaining-requirements-subtitle {
+    margin: 3px 0 0;
+    color: rgba(205, 215, 235, 0.58);
+    font-size: 11px;
+}
+
+.remaining-gap-list {
+    display: grid;
+    gap: 10px;
+}
+
+.remaining-gap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    padding: 14px 16px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.remaining-gap-left {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.remaining-gap-title {
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 750;
+}
+
+.remaining-gap-reason {
+    color: rgba(195, 205, 225, 0.58);
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+.remaining-gap-status {
+    flex-shrink: 0;
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: rgba(255, 184, 77, 0.10);
+    border: 1px solid rgba(255, 184, 77, 0.20);
+    color: #ffc56b;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.7px;
+}
+
+
+/* ============================================================
+   PROJECTION NOTE / DISCLAIMER
+   ============================================================ */
+
+.projection-note {
+    margin-top: 20px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    background: rgba(90, 110, 180, 0.07);
+    border: 1px solid rgba(120, 140, 210, 0.12);
+    color: rgba(190, 200, 225, 0.62);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.projection-note strong {
+    color: rgba(225, 230, 250, 0.85);
+}
+
+
+/* ============================================================
+   EMPTY DEVELOPMENT STATE
+   ============================================================ */
+
+.development-empty {
+    padding: 30px;
+    text-align: center;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px dashed rgba(255, 255, 255, 0.10);
+}
+
+.development-empty-title {
+    margin: 0 0 7px;
+    color: #ffffff;
+    font-size: 16px;
+    font-weight: 800;
+}
+
+.development-empty-text {
+    margin: 0;
+    color: rgba(205, 215, 235, 0.58);
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+    .development-header {
+        flex-direction: column;
+    }
+
+    .projection-box {
+        width: 100%;
+    }
+
+    .development-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .development-plan-card {
+        padding: 20px;
+        border-radius: 18px;
+    }
+
+    .development-header h2 {
+        font-size: 23px;
+    }
+
+    .projection-score {
+        font-size: 38px;
+    }
+
+    .development-skill {
+        padding: 16px;
+        gap: 12px;
+    }
+
+    .skill-orbit {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+    }
+
+    .skill-orbit span {
+        font-size: 14px;
+    }
+
+    .remaining-gap {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .remaining-gap-status {
+        align-self: flex-start;
+    }
+
+    .fit-progress-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 5px;
+    }
+}
+/* ============================================================
+   CAREER AI ASSISTANT
+   ============================================================ */
+
+.career-ai-assistant {
+    position: relative;
+    width: 100%;
+    margin-top: 28px;
+    padding: 32px;
+    border-radius: 24px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(19, 24, 52, 0.96),
+            rgba(9, 14, 34, 0.98)
+        );
+
+    border: 1px solid rgba(119, 87, 255, 0.28);
+
+    box-shadow:
+        0 25px 70px rgba(0, 0, 0, 0.32),
+        0 0 45px rgba(119, 87, 255, 0.06);
+
+    backdrop-filter: blur(22px);
+
+    overflow: hidden;
+}
+
+
+/* ============================================================
+   TOP GLOW
+   ============================================================ */
+
+.career-ai-assistant::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 12%;
+    right: 12%;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            #7757ff,
+            #38d9ff,
+            #7757ff,
+            transparent
+        );
+
+    box-shadow:
+        0 0 22px rgba(56, 217, 255, 0.35);
+
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   BACKGROUND GLOW
+   ============================================================ */
+
+.career-ai-assistant::after {
+    content: "";
+
+    position: absolute;
+
+    width: 300px;
+    height: 300px;
+
+    right: -130px;
+    top: -120px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(119, 87, 255, 0.10);
+
+    filter: blur(70px);
+
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.career-ai-header {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 25px;
+
+    margin-bottom: 28px;
+}
+
+
+.career-ai-header > div:first-child {
+    flex: 1;
+}
+
+
+.career-ai-label {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    color: #a99cff;
+
+    font-size: 10px;
+    font-weight: 900;
+
+    letter-spacing: 1.6px;
+
+    background:
+        rgba(119, 87, 255, 0.10);
+
+    border:
+        1px solid rgba(119, 87, 255, 0.25);
+}
+
+
+.career-ai-label::before {
+    content: "✦";
+
+    margin-right: 7px;
+
+    color: #38d9ff;
+}
+
+
+.career-ai-header h2 {
+    margin: 10px 0 7px;
+
+    color: #ffffff;
+
+    font-size: 28px;
+    font-weight: 850;
+
+    letter-spacing: -0.6px;
+}
+
+
+.career-ai-header p {
+    margin: 0;
+
+    max-width: 720px;
+
+    color:
+        rgba(210, 218, 240, 0.65);
+
+    font-size: 13px;
+
+    line-height: 1.7;
+}
+
+
+/* ============================================================
+   AI ICON
+   ============================================================ */
+
+.career-ai-icon {
+    width: 58px;
+    height: 58px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+
+    color: #ffffff;
+
+    font-size: 23px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(119, 87, 255, 0.25),
+            rgba(56, 217, 255, 0.13)
+        );
+
+    border:
+        1px solid rgba(119, 87, 255, 0.30);
+
+    box-shadow:
+        0 0 28px rgba(119, 87, 255, 0.13);
+
+    animation:
+        careerIconPulse 3s ease-in-out infinite;
+}
+
+
+/* ============================================================
+   SUGGESTED QUESTIONS
+   ============================================================ */
+
+.career-suggestions {
+    position: relative;
+    z-index: 2;
+
+    margin-bottom: 22px;
+
+    padding: 20px;
+
+    border-radius: 18px;
+
+    background:
+        rgba(5, 9, 25, 0.48);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.055);
+}
+
+
+.suggestions-title {
+    margin-bottom: 13px;
+
+    color: #9da5c2;
+
+    font-size: 10px;
+    font-weight: 850;
+
+    letter-spacing: 1.3px;
+
+    text-transform: uppercase;
+}
+
+
+.suggestions-title::before {
+    content: "⌁ ";
+
+    color: #38d9ff;
+}
+
+
+.suggestion-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+
+.suggestion-btn {
+    position: relative;
+
+    min-height: 48px;
+
+    padding: 12px 15px;
+
+    color: #cfd4e8;
+
+    text-align: left;
+
+    font-family: inherit;
+
+    font-size: 11px;
+    font-weight: 650;
+
+    line-height: 1.45;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(119, 87, 255, 0.055),
+            rgba(56, 217, 255, 0.025)
+        );
+
+    border:
+        1px solid rgba(255, 255, 255, 0.065);
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.22s ease,
+        border-color 0.22s ease,
+        background 0.22s ease,
+        box-shadow 0.22s ease;
+}
+
+
+.suggestion-btn::before {
+    content: "→";
+
+    margin-right: 8px;
+
+    color: #8170ff;
+
+    font-weight: 900;
+}
+
+
+.suggestion-btn:hover {
+    transform: translateY(-2px);
+
+    color: #ffffff;
+
+    border-color:
+        rgba(119, 87, 255, 0.35);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(119, 87, 255, 0.13),
+            rgba(56, 217, 255, 0.045)
+        );
+
+    box-shadow:
+        0 8px 25px rgba(0, 0, 0, 0.20);
+}
+
+
+/* ============================================================
+   CHAT WINDOW
+   ============================================================ */
+
+.career-chat-messages {
+    position: relative;
+    z-index: 2;
+
+    min-height: 250px;
+    max-height: 430px;
+
+    margin-bottom: 14px;
+    padding: 20px;
+
+    overflow-y: auto;
+
+    border-radius: 18px;
+
+    background:
+        rgba(4, 8, 22, 0.65);
+
+    border:
+        1px solid rgba(255, 255, 255, 0.055);
+
+    scrollbar-width: thin;
+    scrollbar-color:
+        rgba(119, 87, 255, 0.45)
+        transparent;
+}
+
+
+.career-chat-messages::-webkit-scrollbar {
+    width: 5px;
+}
+
+
+.career-chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+.career-chat-messages::-webkit-scrollbar-thumb {
+    background:
+        rgba(119, 87, 255, 0.40);
+
+    border-radius: 999px;
+}
+
+
+/* ============================================================
+   CHAT MESSAGE
+   ============================================================ */
+
+.career-message {
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 12px;
+
+    margin-bottom: 17px;
+}
+
+
+.career-message:last-child {
+    margin-bottom: 0;
+}
+
+
+.message-avatar {
+    width: 34px;
+    height: 34px;
+
+    min-width: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 11px;
+
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 900;
+
+    background:
+        linear-gradient(
+            135deg,
+            #7757ff,
+            #4e72ff
+        );
+
+    box-shadow:
+        0 0 18px rgba(119, 87, 255, 0.18);
+}
+
+
+.message-content {
+    max-width: 85%;
+}
+
+
+.message-name {
+    margin-bottom: 5px;
+
+    color: #9e91ff;
+
+    font-size: 10px;
+    font-weight: 850;
+
+    letter-spacing: 0.7px;
+}
+
+
+.message-text {
+    padding: 13px 16px;
+
+    color: #d5d9e8;
+
+    font-size: 12px;
+
+    line-height: 1.7;
+
+    background:
+        rgba(119, 87, 255, 0.055);
+
+    border:
+        1px solid rgba(119, 87, 255, 0.11);
+
+    border-radius:
+        5px
+        16px
+        16px
+        16px;
+}
+
+
+/* ============================================================
+   USER MESSAGE
+   ============================================================ */
+
+.career-message.user {
+    flex-direction: row-reverse;
+}
+
+
+.career-message.user .message-avatar {
+    background:
+        linear-gradient(
+            135deg,
+            #2d9fc1,
+            #38d9ff
+        );
+
+    color: #06151c;
+}
+
+
+.career-message.user .message-content {
+    text-align: right;
+}
+
+
+.career-message.user .message-name {
+    color: #55dfff;
+}
+
+
+.career-message.user .message-text {
+    text-align: left;
+
+    background:
+        rgba(56, 217, 255, 0.055);
+
+    border:
+        1px solid rgba(56, 217, 255, 0.11);
+
+    border-radius:
+        16px
+        5px
+        16px
+        16px;
+}
+
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+
+.career-chat-loading {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    margin:
+        0
+        0
+        12px
+        47px;
+
+    color: #858da8;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+
+.career-chat-loading span {
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: #8170ff;
+
+    animation:
+        chatDot 1.2s infinite ease-in-out;
+}
+
+
+.career-chat-loading span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+
+.career-chat-loading span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+
+/* ============================================================
+   CHAT INPUT
+   ============================================================ */
+
+.career-chat-input-area {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+
+    gap: 10px;
+
+    padding: 7px;
+
+    border-radius: 16px;
+
+    background:
+        rgba(5, 9, 25, 0.78);
+
+    border:
+        1px solid rgba(119, 87, 255, 0.16);
+
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.025);
+}
+
+
+#careerChatInput {
+    flex: 1;
+
+    min-width: 0;
+
+    padding:
+        13px
+        15px;
+
+    color: #eef0ff;
+
+    font-family: inherit;
+
+    font-size: 12px;
+
+    background: transparent;
+
+    border: none;
+
+    outline: none;
+}
+
+
+#careerChatInput::placeholder {
+    color: #676e89;
+}
+
+
+#careerChatInput:focus {
+    outline: none;
+}
+
+
+.career-chat-send {
+    flex-shrink: 0;
+
+    min-width: 105px;
+
+    padding:
+        12px
+        17px;
+
+    border: none;
+
+    border-radius: 11px;
+
+    color: #ffffff;
+
+    font-family: inherit;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.7px;
+
+    background:
+        linear-gradient(
+            110deg,
+            #744de8,
+            #5f70f5
+        );
+
+    box-shadow:
+        0 8px 25px rgba(91, 83, 232, 0.22);
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        opacity 0.2s ease;
+}
+
+
+.career-chat-send span {
+    margin-left: 5px;
+
+    font-size: 14px;
+}
+
+
+.career-chat-send:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 30px rgba(91, 83, 232, 0.32);
+}
+
+
+.career-chat-send:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* ============================================================
+   FOOTER NOTE
+   ============================================================ */
+
+.career-ai-note {
+    position: relative;
+    z-index: 2;
+
+    margin-top: 13px;
+
+    color: #626a83;
+
+    font-family: "Courier New", monospace;
+
+    font-size: 8px;
+
+    line-height: 1.6;
+
+    letter-spacing: 0.8px;
+
+    text-align: center;
+}
+
+
+.career-ai-note::before {
+    content: "◈ ";
+
+    color: rgba(56, 217, 255, 0.55);
+}
+
+
+/* ============================================================
+   CHAT ANIMATIONS
+   ============================================================ */
+
+@keyframes careerIconPulse {
+
+    0%,
+    100% {
+        box-shadow:
+            0 0 22px rgba(119, 87, 255, 0.12);
+    }
+
+    50% {
+        box-shadow:
+            0 0 32px rgba(56, 217, 255, 0.18);
+    }
+}
+
+
+@keyframes chatDot {
+
+    0%,
+    80%,
+    100% {
+        opacity: 0.25;
+        transform: translateY(0);
+    }
+
+    40% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
+
+/* ============================================================
+   CAREER AI RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 800px) {
+
+    .career-ai-assistant {
+        padding: 23px;
+    }
+
+    .career-ai-header {
+        gap: 15px;
+    }
+
+    .career-ai-header h2 {
+        font-size: 24px;
+    }
+
+    .suggestion-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .career-chat-messages {
+        min-height: 230px;
+    }
+}
+
+
+@media (max-width: 520px) {
+
+    .career-ai-assistant {
+        padding: 17px;
+
+        border-radius: 18px;
+    }
+
+    .career-ai-header {
+        flex-direction: column;
+    }
+
+    .career-ai-icon {
+        width: 48px;
+        height: 48px;
+
+        border-radius: 14px;
+    }
+
+    .career-ai-header h2 {
+        font-size: 21px;
+    }
+
+    .career-ai-header p {
+        font-size: 12px;
+    }
+
+    .career-suggestions {
+        padding: 15px;
+    }
+
+    .career-chat-messages {
+        padding: 14px;
+
+        max-height: 380px;
+    }
+
+    .message-content {
+        max-width: 82%;
+    }
+
+    .message-text {
+        font-size: 11px;
+    }
+
+    .career-chat-input-area {
+        padding: 5px;
+    }
+
+    #careerChatInput {
+        padding: 11px;
+
+        font-size: 11px;
+    }
+
+    .career-chat-send {
+        min-width: 78px;
+
+        padding:
+            11px
+            10px;
+    }
+
+    .career-chat-send span {
+        display: none;
+    }
+}

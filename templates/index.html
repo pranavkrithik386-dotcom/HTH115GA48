@@ -3,67 +3,403 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>GA-04 Resume-JD Fit Analyzer</title>
+
     <link rel="stylesheet" href="/static/style.css">
 </head>
-<body>
-<div class="container">
-    <h1>GA-04 Resume–Job Fit Analyzer</h1>
-    <p class="subtitle">Evidence-based, explainable resume-to-job analysis</p>
 
+<body>
+
+<div class="container">
+
+    <!-- =========================
+         MAIN HEADER
+    ========================== -->
+    <h1>GA-04 Resume–Job Fit Analyzer</h1>
+
+    <p class="subtitle">
+        Evidence-based, explainable resume-to-job analysis
+    </p>
+
+
+    <!-- =========================
+         UPLOAD SECTION
+    ========================== -->
     <form id="analyzeForm">
+
         <div class="upload-grid">
+
             <div class="card">
                 <h2>Resume PDF</h2>
-                <input type="file" id="resume" name="resume" accept=".pdf" required>
+
+                <input
+                    type="file"
+                    id="resume"
+                    name="resume"
+                    accept=".pdf"
+                    required
+                >
             </div>
+
+
             <div class="card">
                 <h2>Job Description PDF</h2>
-                <input type="file" id="job" name="job" accept=".pdf" required>
+
+                <input
+                    type="file"
+                    id="job"
+                    name="job"
+                    accept=".pdf"
+                    required
+                >
             </div>
+
         </div>
-        <button type="submit">ANALYZE FIT</button>
+
+        <button type="submit">
+            ANALYZE FIT
+        </button>
+
     </form>
 
-    <div id="loading" class="hidden">Analyzing...</div>
+
+    <!-- =========================
+         LOADING / ERROR
+    ========================== -->
+
+    <div id="loading" class="hidden">
+        Analyzing...
+    </div>
+
     <div id="error" class="error hidden"></div>
 
+
+    <!-- =========================
+         RESULTS
+    ========================== -->
+
     <section id="results" class="hidden">
+
+
+        <!-- =========================
+             FIT SUMMARY
+        ========================== -->
+
         <div class="score-card">
+
             <div>
                 <h2>Fit Summary</h2>
+
                 <p id="files"></p>
             </div>
-            <div class="score" id="score">0%</div>
+
+            <div
+                class="score"
+                id="score"
+            >
+                0%
+            </div>
+
         </div>
 
+
+        <!-- =========================
+             REQUIREMENT EVIDENCE
+        ========================== -->
+
         <div class="card">
-            <h2>Requirement-Level Evidence</h2>
+
+            <h2>
+                Requirement-Level Evidence
+            </h2>
+
             <div id="requirementTable"></div>
+
         </div>
 
+
+        <!-- =========================
+             AI EXPLANATION
+        ========================== -->
+
         <div class="card">
-            <h2>AI Explanation</h2>
+
+            <h2>
+                AI Explanation
+            </h2>
+
             <p id="summary"></p>
+
         </div>
+
+
+        <!-- =========================
+             SKILL GAPS + INTERVIEW
+        ========================== -->
 
         <div class="two-col">
+
+
+            <!-- SKILL GAPS -->
+
             <div class="card">
-                <h2>Skill Gaps</h2>
+
+                <h2>
+                    Skill Gaps
+                </h2>
+
                 <ul id="gaps"></ul>
+
             </div>
+
+
+            <!-- INTERVIEW PREPARATION -->
+
             <div class="card">
-                <h2>Interview Preparation</h2>
+
+                <h2>
+                    Interview Preparation
+                </h2>
+
                 <ul id="questions"></ul>
+
             </div>
+
         </div>
 
+
+        <!-- =========================
+             BIAS SAFEGUARD
+        ========================== -->
+
         <div class="card">
-            <h2>Bias Safeguard</h2>
+
+            <h2>
+                Bias Safeguard
+            </h2>
+
             <p id="biasNote"></p>
+
         </div>
+
+
+        <!-- ==================================================
+             CAREER AI ASSISTANT
+             LAST SECTION
+        =================================================== -->
+
+        <section
+            id="careerAssistant"
+            class="career-ai-assistant"
+        >
+
+
+            <!-- HEADER -->
+
+            <div class="career-ai-header">
+
+                <div>
+
+                    <span class="career-ai-label">
+                        AI CAREER ASSISTANT
+                    </span>
+
+                    <h2>
+                        Ask About Your Skills & Gaps
+                    </h2>
+
+                    <p>
+                        Ask questions about your current fit,
+                        missing skills, development plan and
+                        interview preparation.
+                    </p>
+
+                </div>
+
+
+                <div class="career-ai-icon">
+                    ✦
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 SUGGESTED QUESTIONS
+            ========================== -->
+
+            <div class="career-suggestions">
+
+                <div class="suggestions-title">
+                    Suggested questions
+                </div>
+
+
+                <div class="suggestion-grid">
+
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        data-question="How can I improve my fit to 80%?"
+                    >
+                        How can I improve my fit to 80%?
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        data-question="Which missing skills should I develop first?"
+                    >
+                        Which missing skills should I develop first?
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        data-question="What projects should I build to prove my missing skills?"
+                    >
+                        What projects should I build to prove my skills?
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        data-question="What should I learn for the technical skill gaps in this job?"
+                    >
+                        What should I learn for my skill gaps?
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="suggestion-btn"
+                        data-question="What interview questions should I prepare for my current gaps?"
+                    >
+                        What interview questions should I prepare for?
+                    </button>
+
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 CHAT MESSAGES
+            ========================== -->
+
+            <div
+                id="careerChatMessages"
+                class="career-chat-messages"
+            >
+
+
+                <!-- INITIAL BOT MESSAGE -->
+
+                <div class="career-message bot">
+
+                    <div class="message-avatar">
+                        ✦
+                    </div>
+
+                    <div class="message-content">
+
+                        <div class="message-name">
+                            Career AI
+                        </div>
+
+                        <div class="message-text">
+                            Hi! I've analyzed your current
+                            resume-to-job fit. Ask me anything
+                            about your skills, gaps or
+                            development plan.
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 CHAT LOADING
+            ========================== -->
+
+            <div
+                id="careerChatLoading"
+                class="career-chat-loading hidden"
+            >
+
+                <span></span>
+                <span></span>
+                <span></span>
+
+                Career AI is thinking...
+
+            </div>
+
+
+            <!-- =========================
+                 CHAT INPUT
+            ========================== -->
+
+            <div class="career-chat-input-area">
+
+
+                <input
+                    type="text"
+                    id="careerChatInput"
+                    placeholder="Ask about your skills, gaps or development..."
+                    maxlength="1000"
+                    autocomplete="off"
+                >
+
+
+                <button
+                    type="button"
+                    id="careerChatSend"
+                    class="career-chat-send"
+                >
+                    SEND
+                    <span>➜</span>
+                </button>
+
+
+            </div>
+
+
+            <!-- =========================
+                 AI DISCLAIMER / NOTE
+            ========================== -->
+
+            <div class="career-ai-note">
+
+                Career AI answers are grounded in the
+                current analysis and are intended for
+                skill-development guidance.
+
+            </div>
+
+
+        </section>
+
+
     </section>
+
 </div>
+
+
+<!-- =========================
+     JAVASCRIPT
+========================== -->
+
 <script src="/static/script.js"></script>
+
 </body>
 </html>

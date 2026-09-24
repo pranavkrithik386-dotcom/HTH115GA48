@@ -1,12 +1,21 @@
 // ============================================================
 // GA-04 RESUME-JD FIT ANALYZER
-// FRONTEND ENGINE
+// FRONTEND ENGINE + CAREER AI ASSISTANT
 // ============================================================
+
 
 const form = document.getElementById("analyzeForm");
 const results = document.getElementById("results");
 const loading = document.getElementById("loading");
 const errorBox = document.getElementById("error");
+
+
+// ============================================================
+// CAREER AI STATE
+// ============================================================
+
+let currentCareerContext = null;
+let careerChatHistory = [];
 
 
 // ============================================================
@@ -33,9 +42,11 @@ form.addEventListener("submit", async (e) => {
         const result = await response.json();
 
         if (!response.ok) {
+
             throw new Error(
                 result.error || "Analysis failed."
             );
+
         }
 
 
@@ -73,6 +84,7 @@ form.addEventListener("submit", async (e) => {
                 seen.add(key);
 
                 uniqueResults.push(r);
+
             }
 
         });
@@ -87,17 +99,11 @@ form.addEventListener("submit", async (e) => {
                     <tr>
 
                         <th>Requirement</th>
-
                         <th>Category</th>
-
                         <th>Status</th>
-
                         <th>Resume Evidence</th>
-
                         <th>Page</th>
-
                         <th>Evidence Type</th>
-
                         <th>JD Evidence</th>
 
                     </tr>
@@ -152,7 +158,7 @@ form.addEventListener("submit", async (e) => {
 
 
                                 <td
-                                    class="status ${status}"
+                                    class="status ${escapeHtml(status)}"
                                 >
                                     ${escapeHtml(
                                         r.status ||
@@ -273,6 +279,20 @@ form.addEventListener("submit", async (e) => {
 
 
         // ====================================================
+        // BUILD CAREER AI CONTEXT
+        // ====================================================
+
+        currentCareerContext =
+            buildCareerContext(result);
+
+
+        // Reset previous conversation
+        careerChatHistory = [];
+
+        resetCareerChat();
+
+
+        // ====================================================
         // SHOW RESULTS
         // ====================================================
 
@@ -348,6 +368,7 @@ function renderDevelopmentPlan(plan) {
             document.querySelector(
                 "#summary"
             );
+
 
         if (
             summarySection &&
@@ -468,6 +489,7 @@ function renderDevelopmentPlan(plan) {
                                         )}
                                     </h3>
 
+
                                     <span
                                         class="
                                             development-status
@@ -495,6 +517,7 @@ function renderDevelopmentPlan(plan) {
 
 
                                 <p>
+
                                     <strong>
                                         Develop:
                                     </strong>
@@ -503,6 +526,7 @@ function renderDevelopmentPlan(plan) {
                                         item.develop ||
                                         "Develop this requirement."
                                     )}
+
                                 </p>
 
 
@@ -533,6 +557,7 @@ function renderDevelopmentPlan(plan) {
                                             )}
                                         </b>
                                     </span>
+
 
                                     <span>
                                         After development:
@@ -613,6 +638,7 @@ function renderDevelopmentPlan(plan) {
                     >
                         ⚠
                     </span>
+
 
                     <div>
 
@@ -711,9 +737,11 @@ function renderDevelopmentPlan(plan) {
                         CAREER DEVELOPMENT ENGINE
                     </span>
 
+
                     <h2>
                         Skills You Should Develop
                     </h2>
+
 
                     <p
                         class="
@@ -770,11 +798,13 @@ function renderDevelopmentPlan(plan) {
                         PROJECTED FIT
                     </span>
 
+
                     <strong>
                         ${formatScore(
                             projectedScore
                         )}%
                     </strong>
+
 
                     <span
                         class="
@@ -799,6 +829,7 @@ function renderDevelopmentPlan(plan) {
                         CURRENT FIT
                     </span>
 
+
                     <strong>
                         ${formatScore(
                             currentScore
@@ -819,9 +850,11 @@ function renderDevelopmentPlan(plan) {
                             projection-line
                         "
                     >
+
                         <span>
                             Current
                         </span>
+
 
                         <div
                             class="
@@ -843,6 +876,7 @@ function renderDevelopmentPlan(plan) {
 
                         </div>
 
+
                         <strong>
                             ${formatScore(
                                 currentScore
@@ -861,6 +895,7 @@ function renderDevelopmentPlan(plan) {
                         <span>
                             Projected
                         </span>
+
 
                         <div
                             class="
@@ -881,6 +916,7 @@ function renderDevelopmentPlan(plan) {
                             ></div>
 
                         </div>
+
 
                         <strong>
                             ${formatScore(
@@ -919,6 +955,7 @@ function renderDevelopmentPlan(plan) {
                     ⓘ
                 </span>
 
+
                 <p>
                     ${
                         escapeHtml(
@@ -935,6 +972,545 @@ function renderDevelopmentPlan(plan) {
     `;
 
 }
+
+
+// ============================================================
+// CAREER AI CONTEXT
+// ============================================================
+
+function buildCareerContext(result) {
+
+    return {
+
+        resume: result.resume || "",
+        job: result.job || "",
+
+        current_score:
+            Number(result.score || 0),
+
+        results:
+            result.results || [],
+
+        explanation:
+            result.explanation || {},
+
+        development_plan:
+            result.development_plan || null,
+
+        bias_note:
+            result.bias_note || ""
+
+    };
+
+}
+
+
+// ============================================================
+// RESET CAREER CHAT
+// ============================================================
+
+function resetCareerChat() {
+
+    const messages =
+        document.getElementById(
+            "careerChatMessages"
+        );
+
+
+    if (!messages) {
+        return;
+    }
+
+
+    messages.innerHTML = `
+
+        <div class="career-message bot">
+
+            <div class="message-avatar">
+                ✦
+            </div>
+
+
+            <div class="message-content">
+
+                <div class="message-name">
+                    Career AI
+                </div>
+
+
+                <div class="message-text">
+
+                    Hi! I've analyzed your current
+                    resume-to-job fit. Ask me anything
+                    about your skills, gaps or
+                    development plan.
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    const input =
+        document.getElementById(
+            "careerChatInput"
+        );
+
+
+    if (input) {
+
+        input.value = "";
+
+    }
+
+}
+
+
+// ============================================================
+// ADD CAREER CHAT MESSAGE
+// ============================================================
+
+function addCareerMessage(
+    role,
+    message
+) {
+
+    const messages =
+        document.getElementById(
+            "careerChatMessages"
+        );
+
+
+    if (!messages) {
+        return;
+    }
+
+
+    const wrapper =
+        document.createElement("div");
+
+
+    wrapper.className =
+        `career-message ${role}`;
+
+
+    const avatar =
+        document.createElement("div");
+
+
+    avatar.className =
+        "message-avatar";
+
+
+    avatar.textContent =
+        role === "user"
+            ? "YOU"
+            : "✦";
+
+
+    const content =
+        document.createElement("div");
+
+
+    content.className =
+        "message-content";
+
+
+    const name =
+        document.createElement("div");
+
+
+    name.className =
+        "message-name";
+
+
+    name.textContent =
+        role === "user"
+            ? "You"
+            : "Career AI";
+
+
+    const text =
+        document.createElement("div");
+
+
+    text.className =
+        "message-text";
+
+
+    // textContent prevents AI/user content
+    // from injecting HTML into the page.
+    text.textContent =
+        message;
+
+
+    content.appendChild(name);
+    content.appendChild(text);
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(content);
+
+    messages.appendChild(wrapper);
+
+
+    messages.scrollTop =
+        messages.scrollHeight;
+
+}
+
+
+// ============================================================
+// SEND CAREER QUESTION
+// ============================================================
+
+async function sendCareerQuestion(question) {
+
+    const cleanQuestion =
+        String(question || "").trim();
+
+
+    if (!cleanQuestion) {
+        return;
+    }
+
+
+    if (!currentCareerContext) {
+
+        addCareerMessage(
+            "bot",
+            "Please analyze a resume and job description first."
+        );
+
+        return;
+
+    }
+
+
+    const input =
+        document.getElementById(
+            "careerChatInput"
+        );
+
+
+    const sendButton =
+        document.getElementById(
+            "careerChatSend"
+        );
+
+
+    const loadingBox =
+        document.getElementById(
+            "careerChatLoading"
+        );
+
+
+    // --------------------------------------------------------
+    // Add user message
+    // --------------------------------------------------------
+
+    addCareerMessage(
+        "user",
+        cleanQuestion
+    );
+
+
+    careerChatHistory.push({
+
+        role: "user",
+
+        content:
+            cleanQuestion
+
+    });
+
+
+    // Keep only recent conversation
+    careerChatHistory =
+        careerChatHistory.slice(-6);
+
+
+    // --------------------------------------------------------
+    // UI loading state
+    // --------------------------------------------------------
+
+    if (input) {
+
+        input.disabled = true;
+
+    }
+
+
+    if (sendButton) {
+
+        sendButton.disabled = true;
+
+    }
+
+
+    if (loadingBox) {
+
+        loadingBox.classList.remove(
+            "hidden"
+        );
+
+    }
+
+
+    try {
+
+        // ----------------------------------------------------
+        // Send to Flask backend
+        // ----------------------------------------------------
+
+        const response =
+            await fetch(
+                "/career-chat",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        question:
+                            cleanQuestion,
+
+                        context:
+                            currentCareerContext,
+
+                        history:
+                            careerChatHistory.slice(-6)
+
+                    })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Career AI request failed."
+            );
+
+        }
+
+
+        const answer =
+            data.answer ||
+            "I could not generate an answer for this question.";
+
+
+        // ----------------------------------------------------
+        // Add AI response
+        // ----------------------------------------------------
+
+        addCareerMessage(
+            "bot",
+            answer
+        );
+
+
+        careerChatHistory.push({
+
+            role: "assistant",
+
+            content:
+                answer
+
+        });
+
+
+        careerChatHistory =
+            careerChatHistory.slice(-6);
+
+
+    } catch (err) {
+
+        addCareerMessage(
+            "bot",
+            `Sorry, I couldn't answer that right now. ${err.message}`
+        );
+
+    } finally {
+
+        // ----------------------------------------------------
+        // Restore UI
+        // ----------------------------------------------------
+
+        if (input) {
+
+            input.disabled = false;
+
+        }
+
+
+        if (sendButton) {
+
+            sendButton.disabled = false;
+
+        }
+
+
+        if (loadingBox) {
+
+            loadingBox.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        if (input) {
+
+            input.focus();
+
+        }
+
+    }
+
+}
+
+
+// ============================================================
+// CAREER AI SEND BUTTON
+// ============================================================
+
+const careerSendButton =
+    document.getElementById(
+        "careerChatSend"
+    );
+
+
+if (careerSendButton) {
+
+    careerSendButton.addEventListener(
+        "click",
+        () => {
+
+            const input =
+                document.getElementById(
+                    "careerChatInput"
+                );
+
+
+            if (!input) {
+                return;
+            }
+
+
+            sendCareerQuestion(
+                input.value
+            );
+
+
+            input.value = "";
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// CAREER AI ENTER KEY
+// ============================================================
+
+const careerInput =
+    document.getElementById(
+        "careerChatInput"
+    );
+
+
+if (careerInput) {
+
+    careerInput.addEventListener(
+        "keydown",
+        (e) => {
+
+            if (
+                e.key === "Enter" &&
+                !e.shiftKey
+            ) {
+
+                e.preventDefault();
+
+
+                if (
+                    careerSendButton &&
+                    !careerSendButton.disabled
+                ) {
+
+                    careerSendButton.click();
+
+                }
+
+            }
+
+        }
+    );
+
+}
+
+
+// ============================================================
+// SUGGESTED QUESTIONS
+// ============================================================
+
+document
+    .querySelectorAll(
+        ".suggestion-btn"
+    )
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const question =
+                    button.dataset.question;
+
+
+                const input =
+                    document.getElementById(
+                        "careerChatInput"
+                    );
+
+
+                if (input) {
+
+                    input.value =
+                        question;
+
+                }
+
+
+                sendCareerQuestion(
+                    question
+                );
+
+
+                if (input) {
+
+                    input.value = "";
+
+                }
+
+            }
+        );
+
+    });
 
 
 // ============================================================
@@ -981,27 +1557,37 @@ function getSkillIcon(requirement) {
 function formatRequirement(value) {
 
     if (!value) {
+
         return "Requirement";
+
     }
 
 
     const replacements = {
 
-        "aws s3": "AWS S3",
+        "aws s3":
+            "AWS S3",
 
-        "pyspark": "PySpark",
+        "pyspark":
+            "PySpark",
 
-        "airflow": "Apache Airflow",
+        "airflow":
+            "Apache Airflow",
 
-        "etl": "ETL / Data Pipelines",
+        "etl":
+            "ETL / Data Pipelines",
 
-        "bachelor's degree": "Bachelor's Degree",
+        "bachelor's degree":
+            "Bachelor's Degree",
 
-        "sql": "SQL",
+        "sql":
+            "SQL",
 
-        "aws": "AWS",
+        "aws":
+            "AWS",
 
-        "git": "Git"
+        "git":
+            "Git"
 
     };
 
@@ -1021,8 +1607,10 @@ function formatRequirement(value) {
 
 
     return String(value)
-        .replace(/\b\w/g, char =>
-            char.toUpperCase()
+        .replace(
+            /\b\w/g,
+            char =>
+                char.toUpperCase()
         );
 
 }
