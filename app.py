@@ -2,6 +2,8 @@ import os
 import re
 import json
 import sqlite3
+from urllib.parse import quote_plus
+from urllib.request import Request, urlopen
 from pathlib import Path
 
 from flask import Flask, render_template, request, jsonify
@@ -1723,6 +1725,314 @@ DEVELOPMENT_GUIDANCE = {
     }
 
 }
+
+
+# ============================================================
+# CAREER PATHWAY CURATED DATA
+# ============================================================
+
+CAREER_CERTIFICATIONS = {
+
+    "sql": [
+        {
+            "provider": "Microsoft",
+            "name": "Microsoft Certified: Azure Data Fundamentals",
+            "type": "Certification",
+            "url": "https://learn.microsoft.com/en-us/credentials/certifications/azure-data-fundamentals/"
+        }
+    ],
+
+    "python": [
+        {
+            "provider": "Python Institute",
+            "name": "PCEP - Certified Entry-Level Python Programmer",
+            "type": "Certification",
+            "url": "https://pythoninstitute.org/pcep"
+        }
+    ],
+
+    "machine learning": [
+        {
+            "provider": "Google",
+            "name": "Google Advanced Data Analytics Professional Certificate",
+            "type": "Professional Certificate",
+            "url": "https://grow.google/certificates/advanced-data-analytics/"
+        }
+    ],
+
+    "aws": [
+        {
+            "provider": "Amazon Web Services",
+            "name": "AWS Certified Cloud Practitioner",
+            "type": "Certification",
+            "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/"
+        }
+    ],
+
+    "aws s3": [
+        {
+            "provider": "Amazon Web Services",
+            "name": "AWS Certified Cloud Practitioner",
+            "type": "Certification",
+            "url": "https://aws.amazon.com/certification/certified-cloud-practitioner/"
+        }
+    ],
+
+    "pyspark": [
+        {
+            "provider": "Databricks",
+            "name": "Databricks Certified Associate Developer for Apache Spark",
+            "type": "Certification",
+            "url": "https://www.databricks.com/learn/certification/apache-spark-developer-associate"
+        }
+    ],
+
+    "airflow": [
+        {
+            "provider": "Astronomer",
+            "name": "Astronomer Certification for Apache Airflow Fundamentals",
+            "type": "Certification",
+            "url": "https://www.astronomer.io/certification/"
+        }
+    ],
+
+    "etl": [
+        {
+            "provider": "Google Cloud",
+            "name": "Professional Data Engineer Certification",
+            "type": "Certification",
+            "url": "https://cloud.google.com/learn/certification/data-engineer"
+        }
+    ],
+
+    "data analysis": [
+        {
+            "provider": "Google",
+            "name": "Google Data Analytics Professional Certificate",
+            "type": "Professional Certificate",
+            "url": "https://grow.google/certificates/data-analytics/"
+        }
+    ],
+
+    "docker": [
+        {
+            "provider": "Docker",
+            "name": "Docker Certified Associate",
+            "type": "Certification",
+            "url": "https://www.docker.com/certification/"
+        }
+    ],
+
+    "power bi": [
+        {
+            "provider": "Microsoft",
+            "name": "Microsoft Certified: Power BI Data Analyst Associate",
+            "type": "Certification",
+            "url": "https://learn.microsoft.com/en-us/credentials/certifications/data-analyst-associate/"
+        }
+    ],
+
+    "git": [
+        {
+            "provider": "GitHub",
+            "name": "GitHub Foundations",
+            "type": "Certification",
+            "url": "https://resources.github.com/learn/pathways/skills/github-foundations/"
+        }
+    ],
+
+    "javascript": [
+        {
+            "provider": "Meta",
+            "name": "Meta Front-End Developer Professional Certificate",
+            "type": "Professional Certificate",
+            "url": "https://www.coursera.org/professional-certificates/meta-front-end-developer"
+        }
+    ],
+
+    "react": [
+        {
+            "provider": "Meta",
+            "name": "Meta Front-End Developer Professional Certificate",
+            "type": "Professional Certificate",
+            "url": "https://www.coursera.org/professional-certificates/meta-front-end-developer"
+        }
+    ],
+
+    "linux": [
+        {
+            "provider": "Linux Foundation",
+            "name": "Introduction to Linux",
+            "type": "Course",
+            "url": "https://training.linuxfoundation.org/training/introduction-to-linux/"
+        }
+    ]
+}
+
+
+CAREER_ROLES = {
+    "sql": ["Data Analyst", "Data Engineer", "SQL Developer", "Backend Developer"],
+    "python": ["Python Developer", "Data Analyst", "Data Scientist", "ML Engineer"],
+    "machine learning": ["Machine Learning Engineer", "Data Scientist", "Applied Scientist"],
+    "pandas": ["Data Analyst", "Python Developer", "Data Scientist"],
+    "numpy": ["Python Developer", "Data Scientist", "Machine Learning Engineer"],
+    "scikit-learn": ["Machine Learning Engineer", "Data Scientist", "Applied Scientist"],
+    "git": ["Software Developer", "DevOps Engineer", "Data Engineer"],
+    "docker": ["DevOps Engineer", "Cloud Engineer", "Backend Developer"],
+    "fastapi": ["Backend Developer", "Python Developer", "API Developer"],
+    "flask": ["Backend Developer", "Python Developer", "API Developer"],
+    "rest apis": ["Backend Developer", "API Developer", "Integration Engineer"],
+    "postgresql": ["Database Developer", "Backend Developer", "Data Engineer"],
+    "aws": ["Cloud Engineer", "Cloud Developer", "DevOps Engineer", "Data Engineer"],
+    "aws s3": ["Cloud Engineer", "Data Engineer", "Cloud Data Engineer"],
+    "power bi": ["Power BI Developer", "Data Analyst", "Business Intelligence Analyst"],
+    "statistics": ["Data Analyst", "Data Scientist", "Quantitative Analyst"],
+    "data analysis": ["Data Analyst", "Business Intelligence Analyst", "Product Analyst"],
+    "excel": ["Data Analyst", "Business Analyst", "Reporting Analyst"],
+    "tensorflow": ["Machine Learning Engineer", "Deep Learning Engineer", "Data Scientist"],
+    "javascript": ["Frontend Developer", "Full-Stack Developer", "Web Developer"],
+    "react": ["Frontend Developer", "React Developer", "Full-Stack Developer"],
+    "node.js": ["Backend Developer", "Node.js Developer", "Full-Stack Developer"],
+    "mongodb": ["Backend Developer", "Database Developer", "Full-Stack Developer"],
+    "java": ["Java Developer", "Backend Developer", "Software Engineer"],
+    "c++": ["C++ Developer", "Systems Programmer", "Embedded Software Engineer"],
+    "linux": ["Linux Administrator", "DevOps Engineer", "Site Reliability Engineer"],
+    "ci/cd": ["DevOps Engineer", "Release Engineer", "Site Reliability Engineer"],
+    "pyspark": ["Data Engineer", "Big Data Developer", "Data Platform Engineer"],
+    "airflow": ["Data Engineer", "Analytics Engineer", "Data Platform Engineer"],
+    "etl": ["ETL Developer", "Data Engineer", "Analytics Engineer"]
+}
+
+
+CAREER_JOB_PLATFORMS = {
+    "LinkedIn Jobs": "https://www.linkedin.com/jobs/search/?keywords={query}&location={location}",
+    "Indeed": "https://www.indeed.com/jobs?q={query}&l={location}",
+    "Naukri": "https://www.naukri.com/{query}-jobs-in-{location}"
+}
+
+
+def pathway_skills(results):
+    """Return only deterministic, non-matching technical requirements."""
+    skills = []
+    seen = set()
+
+    for item in results or []:
+        requirement = str(item.get("requirement", "")).strip().lower()
+        status = str(item.get("status", "MISSING")).upper()
+
+        if (
+            not requirement
+            or status == "MATCH"
+            or requirement not in SKILL_ALIASES
+            or requirement in {"certification"}
+            or requirement in seen
+        ):
+            continue
+
+        seen.add(requirement)
+        skills.append({
+            "name": requirement,
+            "status": status,
+            "explanation": item.get(
+                "audit_reason",
+                "The job description mentions this skill, but the resume does not provide complete direct evidence."
+            ),
+            "certifications": CAREER_CERTIFICATIONS.get(requirement, []),
+            "roles": CAREER_ROLES.get(requirement, [])
+        })
+
+    return skills
+
+
+def live_job_search_links(query, location):
+    encoded_query = quote_plus(query)
+    encoded_location = quote_plus(location)
+    return [
+        {
+            "platform": platform,
+            "label": "LIVE JOB SEARCH",
+            "url": template.format(
+                query=encoded_query,
+                location=encoded_location
+            )
+        }
+        for platform, template in CAREER_JOB_PLATFORMS.items()
+    ]
+
+
+def fetch_adzuna_jobs(query, location):
+    app_id = os.getenv("ADZUNA_APP_ID", "").strip()
+    app_key = os.getenv("ADZUNA_APP_KEY", "").strip()
+    country = os.getenv("ADZUNA_COUNTRY", "in").strip() or "in"
+
+    if not app_id or not app_key:
+        return None
+
+    url = (
+        f"https://api.adzuna.com/v1/api/jobs/{quote_plus(country)}/search/1"
+        f"?app_id={quote_plus(app_id)}&app_key={quote_plus(app_key)}"
+        f"&results_per_page=10&what={quote_plus(query)}"
+        f"&where={quote_plus(location)}&content-type=application/json"
+    )
+
+    try:
+        response = urlopen(
+            Request(url, headers={"User-Agent": "GA04-Fit-Analyzer/1.0"}),
+            timeout=8
+        )
+        payload = json.loads(response.read().decode("utf-8"))
+        jobs = []
+
+        for job in payload.get("results", []):
+            jobs.append({
+                "title": job.get("title", ""),
+                "company": (job.get("company") or {}).get("display_name", ""),
+                "location": (job.get("location") or {}).get("display_name", ""),
+                "created": job.get("created", ""),
+                "url": job.get("redirect_url", "")
+            })
+
+        return jobs
+    except Exception:
+        return None
+
+
+def build_career_pathway(results, location):
+    skills = pathway_skills(results)
+    skill_query = " ".join(skill["name"] for skill in skills[:3])
+    query = skill_query or "technology jobs"
+    jobs = fetch_adzuna_jobs(query, location)
+
+    if jobs is not None:
+        live_jobs = {
+            "mode": "api",
+            "label": "LIVE JOBS",
+            "provider": "Adzuna",
+            "query": query,
+            "location": location,
+            "jobs": jobs,
+            "search_links": []
+        }
+    else:
+        live_jobs = {
+            "mode": "search_links",
+            "label": "LIVE JOB SEARCH",
+            "provider": None,
+            "query": query,
+            "location": location,
+            "jobs": [],
+            "search_links": live_job_search_links(query, location)
+        }
+
+    return {
+        "skills": skills,
+        "live_jobs": live_jobs,
+        "notice": (
+            "Job listings are fetched from the configured jobs API."
+            if live_jobs["mode"] == "api"
+            else "No jobs API credentials are configured. These links open live searches on established job platforms; no listings are fabricated."
+        )
+    }
 
 
 # ============================================================
@@ -3722,6 +4032,26 @@ def health():
             )
 
     })
+
+
+# ============================================================
+# CAREER PATHWAY
+# ============================================================
+
+@app.post("/career-pathway")
+def career_pathway():
+
+    data = request.get_json(silent=True) or {}
+    context = data.get("context", data)
+    results = context.get("results", []) if isinstance(context, dict) else []
+    location = str(data.get("location", "India")).strip() or "India"
+
+    if len(location) > 120:
+        return jsonify({
+            "error": "Location is too long. Maximum is 120 characters."
+        }), 400
+
+    return jsonify(build_career_pathway(results, location))
 
 
 # ============================================================

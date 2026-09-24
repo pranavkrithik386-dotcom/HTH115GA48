@@ -8,6 +8,9 @@ const form = document.getElementById("analyzeForm");
 const results = document.getElementById("results");
 const loading = document.getElementById("loading");
 const errorBox = document.getElementById("error");
+const careerPathway = document.getElementById("careerPathway");
+const careerLocation = document.getElementById("careerLocation");
+const customCareerLocation = document.getElementById("customCareerLocation");
 
 
 // ============================================================
@@ -285,6 +288,8 @@ form.addEventListener("submit", async (e) => {
         currentCareerContext =
             buildCareerContext(result);
 
+        await loadCareerPathway(result.results || []);
+
 
         // Reset previous conversation
         careerChatHistory = [];
@@ -327,6 +332,194 @@ form.addEventListener("submit", async (e) => {
 
     }
 
+});
+
+
+// ============================================================
+// CAREER PATHWAY
+// ============================================================
+
+function selectedCareerLocation() {
+
+    if (
+        careerLocation &&
+        careerLocation.value === "custom"
+    ) {
+        return String(
+            customCareerLocation?.value || "India"
+        ).trim() || "India";
+    }
+
+    return careerLocation?.value || "India";
+}
+
+
+async function loadCareerPathway(resultsData) {
+
+    if (!careerPathway) {
+        return;
+    }
+
+    const loadingBox = document.getElementById("careerPathwayLoading");
+    const pathwayError = document.getElementById("careerPathwayError");
+    const content = document.getElementById("careerPathwayContent");
+
+    careerPathway.classList.remove("hidden");
+    loadingBox?.classList.remove("hidden");
+    pathwayError?.classList.add("hidden");
+    content.innerHTML = "";
+
+    try {
+        const response = await fetch("/career-pathway", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                results: resultsData,
+                location: selectedCareerLocation()
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Career pathway request failed.");
+        }
+
+        renderCareerPathway(data);
+    } catch (err) {
+        pathwayError.textContent = err.message;
+        pathwayError.classList.remove("hidden");
+    } finally {
+        loadingBox?.classList.add("hidden");
+    }
+}
+
+
+function renderCareerPathway(data) {
+
+    const content = document.getElementById("careerPathwayContent");
+    const skills = data.skills || [];
+    const liveJobs = data.live_jobs || {};
+
+    if (!skills.length) {
+        content.innerHTML = `
+            <div class="career-pathway-empty">
+                <h3>No missing or partial technical skills were identified.</h3>
+                <p>Live job searches remain available for the selected location.</p>
+            </div>
+        `;
+    } else {
+        content.innerHTML = `
+            <div class="pathway-stage-label">SKILL GAP</div>
+            <div class="pathway-skill-grid">
+                ${skills.map(renderPathwaySkill).join("")}
+            </div>
+        `;
+    }
+
+    content.insertAdjacentHTML("beforeend", renderLiveJobs(liveJobs));
+}
+
+
+function renderPathwaySkill(skill) {
+
+    const certifications = skill.certifications || [];
+    const roles = skill.roles || [];
+
+    return `
+        <article class="pathway-skill-card">
+            <div class="pathway-card-heading">
+                <div>
+                    <span class="pathway-kicker">SKILL GAP</span>
+                    <h3>${escapeHtml(formatRequirement(skill.name))}</h3>
+                </div>
+                <span class="pathway-status">${escapeHtml(skill.status || "MISSING")}</span>
+            </div>
+            <p>${escapeHtml(skill.explanation || "This skill is not fully evidenced in the resume.")}</p>
+
+            <div class="pathway-subsection">
+                <span class="pathway-kicker">CERTIFICATION / COURSE</span>
+                ${certifications.length
+                    ? certifications.map(cert => `
+                        <div class="pathway-certification-card">
+                            <strong>${escapeHtml(cert.name)}</strong>
+                            <span>${escapeHtml(cert.provider)} · ${escapeHtml(cert.type)}</span>
+                            <a class="pathway-button" href="${escapeHtml(cert.url)}" target="_blank" rel="noopener noreferrer">
+                                VIEW CERTIFICATION
+                            </a>
+                        </div>
+                    `).join("")
+                    : `<p class="pathway-muted">No curated provider option is configured for this skill yet.</p>`}
+            </div>
+
+            <div class="pathway-subsection">
+                <span class="pathway-kicker">FUTURE SCOPE</span>
+                <h4>Possible career roles</h4>
+                <p class="pathway-muted">These roles commonly use this skill.</p>
+                <div class="pathway-role-list">
+                    ${roles.map(role => `<span>${escapeHtml(role)}</span>`).join("")}
+                </div>
+            </div>
+        </article>
+    `;
+}
+
+
+function renderLiveJobs(liveJobs) {
+
+    const jobs = liveJobs.jobs || [];
+    const links = liveJobs.search_links || [];
+    const jobContent = liveJobs.mode === "api"
+        ? (jobs.length
+            ? jobs.map(job => `
+                <article class="live-job-card">
+                    <div>
+                        <h4>${escapeHtml(job.title || "Job listing")}</h4>
+                        <p>${escapeHtml(job.company || "Company not provided")}</p>
+                        <span>${escapeHtml(job.location || liveJobs.location || "Location not provided")}</span>
+                    </div>
+                    <a class="pathway-button" href="${escapeHtml(job.url)}" target="_blank" rel="noopener noreferrer">VIEW JOB</a>
+                </article>
+            `).join("")
+            : `<p class="pathway-muted">No current API results were returned for this query and location.</p>`)
+        : links.map(link => `
+            <article class="live-job-card search-link-card">
+                <div>
+                    <h4>${escapeHtml(link.platform)}</h4>
+                    <p>Open a current search for ${escapeHtml(liveJobs.query)} in ${escapeHtml(liveJobs.location)}.</p>
+                </div>
+                <a class="pathway-button" href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer">SEARCH LIVE JOBS</a>
+            </article>
+        `).join("");
+
+    return `
+        <div class="pathway-stage-label live-jobs-label">LIVE JOBS</div>
+        <div class="pathway-live-jobs">
+            <div class="live-jobs-header">
+                <div>
+                    <h3>${escapeHtml(liveJobs.label || "LIVE JOB SEARCH")}</h3>
+                    <p>${escapeHtml(liveJobs.query || "Related roles")} · ${escapeHtml(liveJobs.location || "India")}</p>
+                </div>
+                <span class="live-jobs-mode">${liveJobs.mode === "api" ? "API RESULTS" : "SEARCH LINKS"}</span>
+            </div>
+            <div class="live-job-grid">${jobContent}</div>
+        </div>
+    `;
+}
+
+
+careerLocation?.addEventListener("change", () => {
+    customCareerLocation?.classList.toggle(
+        "hidden",
+        careerLocation.value !== "custom"
+    );
+});
+
+
+document.getElementById("careerPathwayRefresh")?.addEventListener("click", () => {
+    if (currentCareerContext) {
+        loadCareerPathway(currentCareerContext.results || []);
+    }
 });
 
 

@@ -3366,3 +3366,331 @@ input:focus-visible {
         display: none;
     }
 }
+
+
+/* ============================================================
+   CAREER PATHWAY
+   ============================================================ */
+
+.career-pathway {
+    margin-top: 30px;
+    padding: 30px;
+    border: 1px solid rgba(56, 217, 255, 0.24);
+    border-radius: 24px;
+    background: linear-gradient(145deg, rgba(14, 32, 52, 0.96), rgba(9, 17, 35, 0.98));
+    box-shadow: 0 22px 65px rgba(0, 0, 0, 0.30), 0 0 40px rgba(56, 217, 255, 0.05);
+}
+
+.career-pathway-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 25px;
+    margin-bottom: 28px;
+}
+
+.career-pathway-header h2 {
+    margin: 9px 0 7px;
+    color: #ffffff;
+    font-size: 28px;
+}
+
+.career-pathway-header p {
+    max-width: 720px;
+    margin: 0;
+    color: rgba(210, 225, 240, 0.68);
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.career-pathway-location {
+    display: grid;
+    flex: 0 0 245px;
+    gap: 8px;
+}
+
+.career-pathway-location label,
+.pathway-kicker,
+.live-jobs-mode {
+    color: #72dfff;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
+
+.career-pathway-location select,
+.career-pathway-location input {
+    width: 100%;
+    padding: 11px 12px;
+    color: #edf5ff;
+    font: inherit;
+    font-size: 12px;
+    background: rgba(3, 12, 27, 0.82);
+    border: 1px solid rgba(56, 217, 255, 0.22);
+    border-radius: 10px;
+}
+
+.career-pathway-location button,
+.pathway-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    padding: 10px 13px;
+    color: #ffffff;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 850;
+    letter-spacing: 0.7px;
+    text-decoration: none;
+    background: linear-gradient(110deg, #1e7e9d, #4268d7);
+    border: 0;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.career-pathway-location button:hover,
+.pathway-button:hover {
+    filter: brightness(1.18);
+    transform: translateY(-1px);
+}
+
+.career-pathway-state {
+    padding: 15px;
+    color: #9fdbed;
+    font-size: 12px;
+    line-height: 1.5;
+    background: rgba(56, 217, 255, 0.06);
+    border: 1px solid rgba(56, 217, 255, 0.15);
+    border-radius: 12px;
+}
+
+.pathway-stage-label {
+    margin: 22px 0 12px;
+    color: #a99cff;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 1.8px;
+}
+
+.pathway-stage-label::after {
+    content: "  ↓";
+    color: #55dfff;
+}
+
+.live-jobs-label {
+    color: #63e6b1;
+}
+
+.live-jobs-label::after {
+    content: "";
+}
+
+.pathway-skill-grid,
+.live-job-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.pathway-skill-card,
+.pathway-live-jobs {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 17px;
+}
+
+.pathway-skill-card {
+    min-width: 0;
+}
+
+.pathway-card-heading,
+.live-jobs-header,
+.live-job-card {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+.pathway-card-heading h3,
+.live-jobs-header h3 {
+    margin: 5px 0 0;
+    color: #ffffff;
+    font-size: 19px;
+}
+
+.pathway-skill-card > p,
+.pathway-certification-card span,
+.pathway-muted,
+.live-job-card p,
+.live-job-card span,
+.live-jobs-header p {
+    color: rgba(210, 220, 240, 0.64);
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+.pathway-skill-card > p {
+    margin: 12px 0 0;
+}
+
+.pathway-status,
+.live-jobs-mode {
+    flex-shrink: 0;
+    padding: 5px 8px;
+    color: #ffc56b;
+    background: rgba(255, 184, 77, 0.10);
+    border: 1px solid rgba(255, 184, 77, 0.22);
+    border-radius: 999px;
+}
+
+.pathway-subsection {
+    margin-top: 20px;
+    padding-top: 17px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.pathway-certification-card {
+    display: grid;
+    gap: 5px;
+    margin-top: 10px;
+    padding: 13px;
+    background: rgba(56, 217, 255, 0.045);
+    border: 1px solid rgba(56, 217, 255, 0.14);
+    border-radius: 12px;
+}
+
+.pathway-certification-card strong {
+    color: #f3fbff;
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+.pathway-certification-card .pathway-button {
+    margin-top: 6px;
+}
+
+.pathway-subsection h4 {
+    margin: 9px 0 0;
+    color: #ffffff;
+    font-size: 14px;
+}
+
+.pathway-subsection .pathway-muted {
+    margin: 5px 0 10px;
+}
+
+.pathway-role-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.pathway-role-list span {
+    padding: 6px 8px;
+    color: #b5f0e2;
+    font-size: 11px;
+    background: rgba(49, 213, 155, 0.08);
+    border: 1px solid rgba(49, 213, 155, 0.17);
+    border-radius: 8px;
+}
+
+.career-pathway .pathway-live-jobs {
+    grid-column: 1 / -1;
+    margin-top: 4px;
+}
+
+.live-jobs-header {
+    margin-bottom: 16px;
+}
+
+.live-jobs-header p {
+    margin: 5px 0 0;
+}
+
+.live-job-card {
+    align-items: center;
+    min-width: 0;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+}
+
+.live-job-card h4 {
+    margin: 0 0 5px;
+    color: #ffffff;
+    font-size: 13px;
+}
+
+.live-job-card p,
+.live-job-card span {
+    margin: 2px 0 0;
+}
+
+.career-pathway-empty {
+    padding: 22px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.13);
+    border-radius: 14px;
+}
+
+.career-pathway-empty h3 {
+    margin: 0 0 7px;
+    color: #ffffff;
+    font-size: 15px;
+}
+
+.career-pathway-empty p,
+.career-pathway-note {
+    color: rgba(205, 215, 235, 0.58);
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.career-pathway-note {
+    margin: 20px 0 0;
+    text-align: center;
+}
+
+@media (max-width: 800px) {
+    .career-pathway-header {
+        flex-direction: column;
+    }
+
+    .career-pathway-location {
+        width: 100%;
+        flex-basis: auto;
+    }
+
+    .pathway-skill-grid,
+    .live-job-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 520px) {
+    .career-pathway {
+        padding: 19px;
+        border-radius: 18px;
+    }
+
+    .career-pathway-header h2 {
+        font-size: 23px;
+    }
+
+    .pathway-card-heading,
+    .live-jobs-header,
+    .live-job-card {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pathway-button {
+        width: 100%;
+    }
+}

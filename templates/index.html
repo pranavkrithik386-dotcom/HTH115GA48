@@ -170,6 +170,71 @@
 
 
         <!-- =========================
+             CAREER PATHWAY
+        ========================== -->
+
+        <section
+            id="careerPathway"
+            class="career-pathway hidden"
+        >
+
+            <div class="career-pathway-header">
+
+                <div>
+                    <span class="tech-label">CAREER PATHWAY</span>
+
+                    <h2>Skill Gap to Possible Roles</h2>
+
+                    <p>
+                        Curated learning options and live job searches based on the
+                        missing or partially evidenced requirements in this analysis.
+                    </p>
+                </div>
+
+                <div class="career-pathway-location">
+                    <label for="careerLocation">JOB SEARCH LOCATION</label>
+                    <select id="careerLocation">
+                        <option>India</option>
+                        <option>Bengaluru</option>
+                        <option>Chennai</option>
+                        <option>Coimbatore</option>
+                        <option>Hyderabad</option>
+                        <option>Mumbai</option>
+                        <option>Delhi</option>
+                        <option>Pune</option>
+                        <option value="custom">Other location...</option>
+                    </select>
+                    <input
+                        type="text"
+                        id="customCareerLocation"
+                        class="hidden"
+                        placeholder="Enter a city or region"
+                        maxlength="120"
+                    >
+                    <button type="button" id="careerPathwayRefresh">
+                        REFRESH JOBS
+                    </button>
+                </div>
+
+            </div>
+
+            <div id="careerPathwayLoading" class="career-pathway-state hidden">
+                Loading curated pathway and live job search options...
+            </div>
+
+            <div id="careerPathwayError" class="career-pathway-state error hidden"></div>
+
+            <div id="careerPathwayContent"></div>
+
+            <p class="career-pathway-note">
+                Certifications and courses are curated provider links. Possible career roles
+                commonly use these skills, but neither training nor role examples guarantee employment.
+            </p>
+
+        </section>
+
+
+        <!-- =========================
              BIAS SAFEGUARD
         ========================== -->
 
