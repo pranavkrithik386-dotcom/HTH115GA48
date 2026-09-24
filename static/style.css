@@ -1,73 +1,1764 @@
+/* ============================================================
+   JOB FIT ANALYZER
+   FUTURISTIC AI ANALYSIS INTERFACE
+   ============================================================ */
+
+:root {
+    --bg: #050817;
+    --bg-dark: #02040d;
+
+    --cyan: #00e5ff;
+    --blue: #367cff;
+    --purple: #865cff;
+    --violet: #a477ff;
+    --pink: #ec4b9c;
+
+    --green: #25d979;
+    --yellow: #ffd84d;
+    --red: #ff5575;
+
+    --white: #f8fbff;
+    --text: #dce7f5;
+    --muted: #8292aa;
+
+    --border: rgba(150, 170, 200, 0.13);
+}
+
+
+/* ============================================================
+   RESET
+   ============================================================ */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f6f8;
     margin: 0;
-    color: #1f2937;
+
+    min-height: 100vh;
+
+    color: var(--white);
+
+    font-family:
+        Inter,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+
+    overflow-x: hidden;
+
+    background:
+        radial-gradient(
+            circle at 18% 15%,
+            rgba(134, 92, 255, 0.11),
+            transparent 27%
+        ),
+        radial-gradient(
+            circle at 82% 20%,
+            rgba(0, 229, 255, 0.08),
+            transparent 27%
+        ),
+        radial-gradient(
+            circle at 50% 80%,
+            rgba(54, 124, 255, 0.06),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            #03050d,
+            #07091b 45%,
+            #03101a
+        );
 }
+
+
+/* ============================================================
+   TECH GRID
+   ============================================================ */
+
+body::before {
+    content: "";
+
+    position: fixed;
+
+    inset: 0;
+
+    pointer-events: none;
+
+    z-index: -10;
+
+    background-image:
+        linear-gradient(
+            rgba(0, 229, 255, 0.028) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(0, 229, 255, 0.028) 1px,
+            transparent 1px
+        );
+
+    background-size: 42px 42px;
+}
+
+
+/* ============================================================
+   GLOBAL TECH CORNER HUD
+   ============================================================ */
+
+body::after {
+    content:
+        "◈  AI.SYS                         FIT_ENGINE  ◈\A"
+        "⌁  ANALYSIS NODE                 ONLINE  ⌁\A"
+        "╰────────────────────────────────────╯";
+
+    position: fixed;
+
+    top: 22px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    width: min(1100px, 88%);
+
+    color: rgba(0, 229, 255, 0.18);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+
+    letter-spacing: 2px;
+
+    line-height: 2;
+
+    white-space: pre;
+
+    pointer-events: none;
+
+    z-index: 20;
+
+    text-align: center;
+}
+
+
+/* ============================================================
+   MAIN CONTAINER
+   ============================================================ */
+
 .container {
-    max-width: 1100px;
-    margin: 40px auto;
-    padding: 20px;
+    position: relative;
+
+    width: min(1200px, 92%);
+
+    margin: 0 auto;
+
+    padding: 65px 0 100px;
 }
-h1 { text-align: center; margin-bottom: 5px; }
-.subtitle { text-align: center; color: #6b7280; }
-.upload-grid, .two-col {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+
+
+/* ============================================================
+   LEFT CORNER ANALYZER HUD
+   ============================================================ */
+
+.container::before {
+    content:
+        "┌─ SYSTEM\A"
+        "│ ANALYZER: ACTIVE\A"
+        "│ MODE: EVIDENCE\A"
+        "│ STATUS: READY\A"
+        "└─ ◈";
+
+    position: fixed;
+
+    left: 28px;
+
+    top: 125px;
+
+    color: rgba(0, 229, 255, 0.30);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+
+    line-height: 1.8;
+
+    letter-spacing: 1px;
+
+    pointer-events: none;
+
+    z-index: 10;
+
+    opacity: 0.85;
 }
-.card, .score-card {
-    background: white;
-    padding: 20px;
-    border-radius: 12px;
-    margin: 20px 0;
-    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+
+
+/* ============================================================
+   RIGHT CORNER RESULT HUD
+   ============================================================ */
+
+.container::after {
+    content:
+        "RESULT // 01\A"
+        "────────────\A"
+        "MATCH ◈\A"
+        "EVIDENCE ⌁\A"
+        "XAI ●";
+
+    position: fixed;
+
+    right: 30px;
+
+    top: 125px;
+
+    color: rgba(139, 92, 246, 0.34);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+
+    line-height: 1.8;
+
+    letter-spacing: 1px;
+
+    text-align: right;
+
+    pointer-events: none;
+
+    z-index: 10;
 }
-button {
-    display: block;
-    margin: 20px auto;
-    padding: 14px 28px;
-    border: 0;
-    border-radius: 8px;
-    background: #111827;
-    color: white;
-    cursor: pointer;
-    font-weight: bold;
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+header {
+    position: relative;
+
+    text-align: center;
+
+    margin-bottom: 45px;
+
+    z-index: 3;
 }
-button:hover { opacity: .9; }
-.score-card {
+
+
+/* ============================================================
+   HERO ICON
+   ============================================================ */
+
+.hero-icon {
+    width: 74px;
+    height: 74px;
+
+    margin: 0 auto 22px;
+
     display: flex;
-    justify-content: space-between;
+
     align-items: center;
+    justify-content: center;
+
+    border-radius: 22px;
+
+    color: var(--cyan);
+
+    font-size: 32px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0, 229, 255, 0.10),
+            rgba(134, 92, 255, 0.16)
+        );
+
+    border:
+        1px solid rgba(0, 229, 255, 0.30);
+
+    box-shadow:
+        0 0 25px rgba(0, 229, 255, 0.13),
+        inset 0 0 30px rgba(134, 92, 255, 0.06);
+
+    animation:
+        heroFloat 4s ease-in-out infinite;
 }
-.score {
-    font-size: 42px;
-    font-weight: bold;
+
+
+/* ============================================================
+   TITLE
+   ============================================================ */
+
+header h1 {
+    margin: 0;
+
+    font-size: clamp(43px, 6vw, 72px);
+
+    line-height: 1;
+
+    font-weight: 900;
+
+    letter-spacing: -3px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ffffff,
+            #b7f8ff,
+            var(--cyan),
+            #ffffff,
+            var(--purple)
+        );
+
+    background-size: 300% auto;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+
+    animation:
+        titleMove 8s linear infinite;
 }
+
+
+/* ============================================================
+   SUBTITLE
+   ============================================================ */
+
+header p {
+    max-width: 700px;
+
+    margin: 17px auto 0;
+
+    color: var(--muted);
+
+    font-size: 16px;
+
+    line-height: 1.7;
+}
+
+
+/* ============================================================
+   TECH BADGES
+   ============================================================ */
+
+.tech-strip {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 10px;
+
+    margin: 27px auto 38px;
+}
+
+.tech-chip {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 8px 14px;
+
+    border-radius: 999px;
+
+    color: #bdcce0;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    letter-spacing: 0.3px;
+
+    background:
+        rgba(5, 12, 27, 0.72);
+
+    border:
+        1px solid rgba(0, 229, 255, 0.13);
+
+    backdrop-filter: blur(15px);
+
+    transition: 0.25s ease;
+}
+
+.tech-chip:hover {
+    transform: translateY(-3px);
+
+    color: white;
+
+    border-color:
+        rgba(0, 229, 255, 0.45);
+
+    box-shadow:
+        0 0 22px rgba(0, 229, 255, 0.10);
+}
+
+.tech-chip span {
+    color: var(--cyan);
+
+    font-size: 14px;
+}
+
+
+/* ============================================================
+   MAIN GLASS CARD
+   ============================================================ */
+
+.card {
+    position: relative;
+
+    padding: 42px;
+
+    border-radius: 28px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(9, 18, 38, 0.88),
+            rgba(3, 9, 23, 0.84)
+        );
+
+    border:
+        1px solid var(--border);
+
+    box-shadow:
+        0 30px 100px rgba(0, 0, 0, 0.38),
+        0 0 70px rgba(0, 229, 255, 0.025);
+
+    backdrop-filter: blur(22px);
+
+    overflow: hidden;
+}
+
+
+/* top laser */
+
+.card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: 12%;
+    right: 12%;
+
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            var(--cyan),
+            var(--purple),
+            transparent
+        );
+
+    box-shadow:
+        0 0 14px rgba(0, 229, 255, 0.35);
+}
+
+
+/* ============================================================
+   UPLOAD FORM
+   ============================================================ */
+
+#analyzeForm {
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    width: 100%;
+}
+
+
+/* ============================================================
+   RIGHT SIDE AI CORE
+   ============================================================ */
+
+#analyzeForm::before {
+    content:
+        "AI CORE\A"
+        "────────────\A"
+        "RESUME  ↔  JD\A"
+        "────────────\A"
+        "MATCHING\A"
+        "EVIDENCE\A"
+        "EXPLAINABLE";
+
+    position: absolute;
+
+    right: -20px;
+
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    width: 235px;
+
+    height: 235px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    color: rgba(0, 229, 255, 0.40);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 9px;
+
+    line-height: 2;
+
+    letter-spacing: 2px;
+
+    white-space: pre;
+
+    border-radius: 50%;
+
+    border:
+        1px solid rgba(0, 229, 255, 0.20);
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(0, 229, 255, 0.055),
+            transparent 70%
+        );
+
+    box-shadow:
+        0 0 40px rgba(0, 229, 255, 0.08),
+        inset 0 0 35px rgba(134, 92, 255, 0.07);
+
+    pointer-events: none;
+
+    z-index: 0;
+
+    animation:
+        corePulse 5s ease-in-out infinite;
+}
+
+
+/* ============================================================
+   UPLOAD BOXES
+   ============================================================ */
+
+.upload-box {
+    position: relative;
+
+    z-index: 2;
+
+    width: min(560px, 100%);
+
+    min-height: 205px;
+
+    margin-bottom: 20px;
+
+    padding: 30px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    border-radius: 23px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(11, 24, 48, 0.94),
+            rgba(4, 11, 27, 0.90)
+        );
+
+    border:
+        1px solid rgba(0, 229, 255, 0.15);
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.18);
+
+    transition: 0.3s ease;
+}
+
+.upload-box:hover {
+    transform: translateY(-5px);
+
+    border-color:
+        rgba(0, 229, 255, 0.42);
+
+    box-shadow:
+        0 20px 55px rgba(0, 0, 0, 0.25),
+        0 0 30px rgba(0, 229, 255, 0.07);
+}
+
+
+/* corner symbols */
+
+.upload-box::before {
+    content: "◈";
+
+    position: absolute;
+
+    top: 14px;
+    left: 17px;
+
+    color: rgba(0, 229, 255, 0.38);
+
+    font-size: 11px;
+}
+
+.upload-box::after {
+    content: "⌁";
+
+    position: absolute;
+
+    bottom: 13px;
+    right: 18px;
+
+    color: rgba(134, 92, 255, 0.45);
+
+    font-size: 16px;
+}
+
+
+/* ============================================================
+   UPLOAD ICON
+   ============================================================ */
+
+.upload-icon {
+    width: 64px;
+    height: 64px;
+
+    margin-bottom: 14px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+
+    color: var(--cyan);
+
+    font-size: 28px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0, 229, 255, 0.09),
+            rgba(134, 92, 255, 0.10)
+        );
+
+    border:
+        1px solid rgba(0, 229, 255, 0.22);
+
+    box-shadow:
+        0 0 25px rgba(0, 229, 255, 0.08);
+}
+
+.upload-box h3 {
+    margin: 5px 0 7px;
+
+    font-size: 20px;
+
+    font-weight: 800;
+}
+
+.upload-box p {
+    margin: 0 0 17px;
+
+    color: var(--muted);
+
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   FILE INPUT
+   ============================================================ */
+
+input[type="file"] {
+    width: min(350px, 100%);
+
+    padding: 8px;
+
+    border-radius: 13px;
+
+    color: #cbd5e1;
+
+    background:
+        rgba(1, 6, 18, 0.85);
+
+    border:
+        1px solid rgba(148, 163, 184, 0.14);
+}
+
+input[type="file"]::file-selector-button {
+    margin-right: 11px;
+
+    padding: 10px 15px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    color: #001018;
+
+    font-weight: 800;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--cyan),
+            var(--blue)
+        );
+
+    cursor: pointer;
+}
+
+
+/* ============================================================
+   ANALYZE BUTTON
+   ============================================================ */
+
+#analyzeForm button {
+    position: relative;
+
+    z-index: 4;
+
+    width: min(360px, 100%);
+
+    margin: 15px auto 0;
+
+    padding: 17px 28px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    color: white;
+
+    font-size: 15px;
+
+    font-weight: 900;
+
+    background:
+        linear-gradient(
+            100deg,
+            var(--purple),
+            var(--blue)
+        );
+
+    box-shadow:
+        0 12px 40px rgba(54, 124, 255, 0.24);
+
+    cursor: pointer;
+
+    transition: 0.25s ease;
+}
+
+#analyzeForm button::before {
+    content: "✦  ";
+}
+
+#analyzeForm button::after {
+    content: "  →";
+}
+
+#analyzeForm button:hover {
+    transform:
+        translateY(-4px)
+        scale(1.02);
+
+    box-shadow:
+        0 20px 50px rgba(54, 124, 255, 0.35),
+        0 0 30px rgba(134, 92, 255, 0.15);
+}
+
+
+/* ============================================================
+   LOADING
+   ============================================================ */
+
+#loading {
+    margin: 25px auto;
+
+    text-align: center;
+
+    color: var(--cyan);
+
+    font-weight: 800;
+
+    animation:
+        loadingPulse 1.3s infinite;
+}
+
+
+/* ============================================================
+   ERROR
+   ============================================================ */
+
+#error {
+    margin: 22px auto;
+
+    padding: 16px 20px;
+
+    max-width: 850px;
+
+    text-align: center;
+
+    color: #fecdd3;
+
+    background:
+        rgba(127, 29, 29, 0.25);
+
+    border:
+        1px solid rgba(255, 77, 109, 0.25);
+
+    border-radius: 14px;
+}
+
+
+/* ============================================================
+   RESULTS
+   ============================================================ */
+
+#results {
+    position: relative;
+
+    margin-top: 60px;
+}
+
+
+/* Result top HUD */
+
+#results::before {
+    content:
+        "◈ RESULT_ANALYSIS\A"
+        "STATUS: COMPLETE\A"
+        "EVIDENCE: VERIFIED";
+
+    position: absolute;
+
+    right: 5px;
+
+    top: -20px;
+
+    color: rgba(0, 229, 255, 0.22);
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-size: 8px;
+
+    line-height: 1.7;
+
+    letter-spacing: 1.5px;
+
+    text-align: right;
+
+    pointer-events: none;
+}
+
+
+/* ============================================================
+   FILE NAMES
+   ============================================================ */
+
+#files {
+    width: min(1000px, 100%);
+
+    margin: 0 auto 25px;
+
+    padding: 13px 20px;
+
+    text-align: center;
+
+    color: #8da0b8;
+
+    font-size: 12px;
+
+    background:
+        rgba(10, 19, 37, 0.55);
+
+    border:
+        1px solid rgba(148, 163, 184, 0.12);
+
+    border-radius: 13px;
+
+    box-shadow:
+        inset 0 0 20px rgba(0, 229, 255, 0.015);
+}
+
+
+/* ============================================================
+   FIT SUMMARY
+   ============================================================ */
+
+.score-card {
+    position: relative;
+
+    width: 100%;
+
+    min-height: 245px;
+
+    margin: 0 auto 40px;
+
+    padding-top: 10px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    text-align: center;
+
+    background: transparent;
+
+    border: none;
+
+    box-shadow: none;
+}
+
+
+/* title */
+
+.score-card h2 {
+    position: static;
+
+    margin: 0 0 32px;
+
+    color: var(--white);
+
+    font-size: 23px;
+
+    font-weight: 850;
+}
+
+
+/* decorative line around title */
+
+.score-card h2::before {
+    content: "◈  ";
+
+    color: var(--cyan);
+
+    font-size: 13px;
+}
+
+.score-card h2::after {
+    content: "  ◈";
+
+    color: var(--purple);
+
+    font-size: 13px;
+}
+
+
+/* ============================================================
+   PERCENTAGE
+   THIS IS THE MAIN STYLE FROM YOUR SCREENSHOT
+   ============================================================ */
+
+#score {
+    position: relative;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: auto;
+    height: auto;
+
+    margin: 0;
+
+    padding: 0;
+
+    font-size: clamp(80px, 10vw, 110px);
+
+    line-height: 0.9;
+
+    font-weight: 950;
+
+    letter-spacing: -7px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #a68cff 0%,
+            #8b6cff 35%,
+            #7c9cff 70%,
+            #b08cff 100%
+        );
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    color: transparent;
+
+    text-shadow:
+        0 0 35px rgba(134, 92, 255, 0.13);
+}
+
+
+/* tiny tech brackets around score */
+
+#score::before {
+    content: "⌜";
+
+    position: absolute;
+
+    left: -45px;
+
+    top: 0;
+
+    color: rgba(0, 229, 255, 0.38);
+
+    font-size: 32px;
+
+    font-weight: 400;
+}
+
+#score::after {
+    content: "⌟";
+
+    position: absolute;
+
+    right: -45px;
+
+    bottom: -10px;
+
+    color: rgba(139, 92, 246, 0.38);
+
+    font-size: 32px;
+
+    font-weight: 400;
+}
+
+
+/* ============================================================
+   SCORE SUBLABEL
+   ============================================================ */
+
+.score-card::after {
+    content:
+        "E V I D E N C E - B A C K E D   F I T   A N A L Y S I S";
+
+    position: static;
+
+    margin-top: 27px;
+
+    color: #65768f;
+
+    font-size: 8px;
+
+    font-family:
+        "Courier New",
+        monospace;
+
+    font-weight: 800;
+
+    letter-spacing: 2.5px;
+}
+
+
+/* ============================================================
+   SECTION TITLES
+   ============================================================ */
+
+.section-title {
+    position: relative;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin: 45px 0 20px;
+
+    text-align: center;
+
+    font-size: 22px;
+
+    font-weight: 850;
+}
+
+.section-title::before {
+    content: "◈";
+
+    color: var(--cyan);
+}
+
+.section-title::after {
+    content: "◈";
+
+    color: var(--purple);
+}
+
+
+/* ============================================================
+   REQUIREMENT TABLE
+   ============================================================ */
+
+#requirementTable {
+    width: 100%;
+
+    overflow-x: auto;
+
+    border-radius: 20px;
+
+    border:
+        1px solid rgba(148, 163, 184, 0.12);
+}
+
 table {
     width: 100%;
+
+    min-width: 850px;
+
     border-collapse: collapse;
+
+    background:
+        rgba(2, 7, 18, 0.50);
 }
-th, td {
-    padding: 12px;
-    border-bottom: 1px solid #e5e7eb;
+
+thead {
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0, 229, 255, 0.07),
+            rgba(134, 92, 255, 0.08)
+        );
+}
+
+th {
+    padding: 16px;
+
+    color: #cbd5e1;
+
+    font-size: 11px;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+
     text-align: left;
-    vertical-align: top;
+
+    border-bottom:
+        1px solid rgba(148, 163, 184, 0.13);
 }
+
+td {
+    padding: 16px;
+
+    color: #cbd5e1;
+
+    font-size: 13px;
+
+    border-bottom:
+        1px solid rgba(148, 163, 184, 0.07);
+}
+
+tbody tr {
+    transition: 0.2s ease;
+}
+
+tbody tr:hover {
+    background:
+        rgba(0, 229, 255, 0.035);
+}
+
+
+/* ============================================================
+   STATUS BADGES
+   ============================================================ */
+
 .status {
-    font-weight: bold;
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 94px;
+
+    padding: 7px 12px;
+
+    border-radius: 999px;
+
+    font-size: 10px;
+
+    font-weight: 900;
+
+    letter-spacing: 0.8px;
 }
-.match { color: #15803d; }
-.partial { color: #b45309; }
-.missing { color: #b91c1c; }
-.error {
-    background: #fee2e2;
-    color: #991b1b;
-    padding: 15px;
-    border-radius: 8px;
+
+.status::before {
+    content: "●";
+
+    margin-right: 7px;
+
+    font-size: 7px;
 }
-.hidden { display: none; }
-li { margin-bottom: 10px; }
+
+.status.match {
+    color: #86efac;
+
+    background:
+        rgba(34, 197, 94, 0.08);
+
+    border:
+        1px solid rgba(34, 197, 94, 0.25);
+}
+
+.status.partial {
+    color: #fde68a;
+
+    background:
+        rgba(250, 204, 21, 0.08);
+
+    border:
+        1px solid rgba(250, 204, 21, 0.22);
+}
+
+.status.missing {
+    color: #fda4af;
+
+    background:
+        rgba(255, 77, 109, 0.08);
+
+    border:
+        1px solid rgba(255, 77, 109, 0.22);
+}
+
+
+/* ============================================================
+   AI SUMMARY
+   ============================================================ */
+
+#summary {
+    max-width: 1000px;
+
+    margin: 0 auto;
+
+    padding: 25px;
+
+    color: #dbeafe;
+
+    line-height: 1.8;
+
+    border-radius: 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(0, 229, 255, 0.04),
+            rgba(134, 92, 255, 0.06)
+        );
+
+    border:
+        1px solid rgba(0, 229, 255, 0.13);
+}
+
+
+/* ============================================================
+   SKILL GAPS
+   UNFILLED PIE STYLE
+   ============================================================ */
+
+#gaps {
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 25px;
+
+    padding: 18px 0 30px;
+
+    list-style: none;
+}
+
+#gaps li {
+    position: relative;
+
+    width: 112px;
+    height: 112px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+
+    text-align: center;
+
+    border-radius: 50%;
+
+    color: #dce7f5;
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+    background:
+        radial-gradient(
+            circle,
+            #07101f 0%,
+            #07101f 57%,
+            transparent 58%
+        );
+
+    border:
+        1px solid rgba(0, 229, 255, 0.15);
+
+    box-shadow:
+        0 0 0 6px rgba(0, 229, 255, 0.02),
+        0 0 30px rgba(0, 229, 255, 0.06);
+
+    transition: 0.3s ease;
+}
+
+
+/* unfilled pie arc */
+
+#gaps li::before {
+    content: "";
+
+    position: absolute;
+
+    inset: -2px;
+
+    border-radius: 50%;
+
+    background:
+        conic-gradient(
+            from 30deg,
+            var(--cyan),
+            var(--purple) 78deg,
+            transparent 79deg,
+            transparent 360deg
+        );
+
+    -webkit-mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 4px),
+            #000 calc(100% - 3px)
+        );
+
+    mask:
+        radial-gradient(
+            farthest-side,
+            transparent calc(100% - 4px),
+            #000 calc(100% - 3px)
+        );
+}
+
+#gaps li::after {
+    content: "⚠";
+
+    position: absolute;
+
+    top: 7px;
+    right: 9px;
+
+    width: 20px;
+    height: 20px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: var(--pink);
+
+    background:
+        #07101f;
+
+    font-size: 9px;
+}
+
+#gaps li:hover {
+    transform:
+        translateY(-7px)
+        scale(1.04);
+
+    border-color:
+        rgba(0, 229, 255, 0.40);
+
+    box-shadow:
+        0 0 35px rgba(0, 229, 255, 0.16);
+}
+
+
+/* ============================================================
+   INTERVIEW QUESTIONS
+   ============================================================ */
+
+#questions {
+    display: grid;
+
+    grid-template-columns:
+        repeat(auto-fit, minmax(280px, 1fr));
+
+    gap: 16px;
+
+    padding: 0;
+
+    list-style: none;
+}
+
+#questions li {
+    position: relative;
+
+    min-height: 100px;
+
+    padding: 20px 20px 20px 58px;
+
+    display: flex;
+
+    align-items: center;
+
+    color: #dbeafe;
+
+    line-height: 1.6;
+
+    border-radius: 18px;
+
+    background:
+        rgba(9, 18, 38, 0.72);
+
+    border:
+        1px solid rgba(148, 163, 184, 0.12);
+
+    transition: 0.25s ease;
+}
+
+#questions li:hover {
+    transform: translateY(-4px);
+
+    border-color:
+        rgba(134, 92, 255, 0.40);
+}
+
+#questions li::before {
+    content: "✦";
+
+    position: absolute;
+
+    left: 17px;
+
+    width: 29px;
+    height: 29px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    color: white;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--purple),
+            var(--blue)
+        );
+}
+
+
+/* ============================================================
+   BIAS SAFEGUARD
+   ============================================================ */
+
+#biasNote {
+    max-width: 1000px;
+
+    margin: 0 auto;
+
+    padding: 20px 23px;
+
+    color: #bbf7d0;
+
+    line-height: 1.7;
+
+    border-radius: 18px;
+
+    background:
+        rgba(34, 197, 94, 0.055);
+
+    border:
+        1px solid rgba(34, 197, 94, 0.18);
+}
+
+#biasNote::before {
+    content: "🛡 ";
+}
+
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+footer {
+    margin-top: 65px;
+
+    text-align: center;
+
+    color: #52657d;
+
+    font-size: 10px;
+
+    letter-spacing: 2px;
+}
+
+footer::before {
+    content:
+        "AI  •  EVIDENCE  •  MATCHING  •  EXPLAINABILITY  •  FAIRNESS";
+
+    display: block;
+
+    margin-bottom: 10px;
+
+    color:
+        rgba(0, 229, 255, 0.28);
+
+    font-size: 8px;
+
+    letter-spacing: 3px;
+}
+
+
+/* ============================================================
+   HIDDEN
+   ============================================================ */
+
+.hidden {
+    display: none !important;
+}
+
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes heroFloat {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-7px);
+    }
+}
+
+@keyframes titleMove {
+    0% {
+        background-position: 0% center;
+    }
+
+    100% {
+        background-position: 300% center;
+    }
+}
+
+@keyframes corePulse {
+    0%,
+    100% {
+        opacity: 0.55;
+
+        transform:
+            translateY(-50%)
+            scale(1);
+    }
+
+    50% {
+        opacity: 0.95;
+
+        transform:
+            translateY(-50%)
+            scale(1.035);
+    }
+}
+
+@keyframes loadingPulse {
+    0%,
+    100% {
+        opacity: 0.4;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 1050px) {
+
+    .container::before,
+    .container::after {
+        display: none;
+    }
+
+    #analyzeForm::before {
+        right: -90px;
+
+        opacity: 0.18;
+    }
+}
+
+
 @media (max-width: 750px) {
-    .upload-grid, .two-col { grid-template-columns: 1fr; }
+
+    .container {
+        width: 94%;
+
+        padding-top: 40px;
+    }
+
+    .card {
+        padding: 25px 18px;
+    }
+
+    header h1 {
+        font-size: 43px;
+
+        letter-spacing: -2px;
+    }
+
+    header p {
+        font-size: 14px;
+    }
+
+    #analyzeForm::before {
+        display: none;
+    }
+
+    .score-card {
+        min-height: 220px;
+    }
+
+    #score {
+        font-size: 78px;
+    }
+
+    #score::before {
+        left: -30px;
+    }
+
+    #score::after {
+        right: -30px;
+    }
+
+    #gaps {
+        gap: 17px;
+    }
+
+    #gaps li {
+        width: 98px;
+        height: 98px;
+    }
+}
+
+
+@media (max-width: 480px) {
+
+    header h1 {
+        font-size: 36px;
+    }
+
+    .tech-chip {
+        font-size: 9px;
+
+        padding: 7px 10px;
+    }
+
+    .upload-box {
+        min-height: 185px;
+
+        padding: 22px;
+    }
+
+    #score {
+        font-size: 65px;
+
+        letter-spacing: -4px;
+    }
+
+    #score::before,
+    #score::after {
+        display: none;
+    }
+
+    .score-card h2 {
+        font-size: 20px;
+
+        margin-bottom: 25px;
+    }
+
+    .score-card::after {
+        font-size: 6px;
+
+        letter-spacing: 1.7px;
+    }
+
+    #gaps li {
+        width: 88px;
+        height: 88px;
+
+        font-size: 9px;
+    }
 }
