@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GA-04 Resume-JD Fit Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="container">
+    <h1>GA-04 Resume–Job Fit Analyzer</h1>
+    <p class="subtitle">Evidence-based, explainable resume-to-job analysis</p>
+
+    <form id="analyzeForm">
+        <div class="upload-grid">
+            <div class="card">
+                <h2>Resume PDF</h2>
+                <input type="file" id="resume" name="resume" accept=".pdf" required>
+            </div>
+            <div class="card">
+                <h2>Job Description PDF</h2>
+                <input type="file" id="job" name="job" accept=".pdf" required>
+            </div>
+        </div>
+        <button type="submit">ANALYZE FIT</button>
+    </form>
+
+    <div id="loading" class="hidden">Analyzing...</div>
+    <div id="error" class="error hidden"></div>
+
+    <section id="results" class="hidden">
+        <div class="score-card">
+            <div>
+                <h2>Fit Summary</h2>
+                <p id="files"></p>
+            </div>
+            <div class="score" id="score">0%</div>
+        </div>
+
+        <div class="card">
+            <h2>Requirement-Level Evidence</h2>
+            <div id="requirementTable"></div>
+        </div>
+
+        <div class="card">
+            <h2>AI Explanation</h2>
+            <p id="summary"></p>
+        </div>
+
+        <div class="two-col">
+            <div class="card">
+                <h2>Skill Gaps</h2>
+                <ul id="gaps"></ul>
+            </div>
+            <div class="card">
+                <h2>Interview Preparation</h2>
+                <ul id="questions"></ul>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Bias Safeguard</h2>
+            <p id="biasNote"></p>
+        </div>
+    </section>
+</div>
+<script src="/static/script.js"></script>
+</body>
+</html>
