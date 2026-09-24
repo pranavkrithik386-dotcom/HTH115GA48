@@ -7,7 +7,12 @@ from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 from dotenv import load_dotenv
-import fitz
+
+try:
+    import pymupdf as fitz
+except ImportError:
+    import fitz
+
 from groq import Groq
 
 
@@ -44,10 +49,7 @@ app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024
 # GROQ
 # ============================================================
 
-GROQ_API_KEY = os.getenv(
-    "GROQ_API_KEY",
-    ""
-)
+GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
 
 GROQ_MODEL = os.getenv(
     "GROQ_MODEL",
@@ -63,7 +65,6 @@ client = (
 
 # ============================================================
 # SKILL ALIASES
-# EXACT MATCH ONLY
 # ============================================================
 
 SKILL_ALIASES = {
@@ -212,7 +213,6 @@ SKILL_ALIASES = {
 
 # ============================================================
 # RELATED SKILLS
-# RELATED = PARTIAL, NEVER MATCH
 # ============================================================
 
 RELATED_SKILLS = {
@@ -309,7 +309,7 @@ CATEGORY_PRIORITY = {
 
 
 # ============================================================
-# CLEAN TEXT
+# TEXT CLEANING
 # ============================================================
 
 def clean_line(line):
@@ -347,6 +347,7 @@ def extract_pdf_pages(path):
             "page": page_number,
 
             "text": page.get_text().strip()
+
         })
 
     doc.close()
@@ -357,11 +358,8 @@ def extract_pdf_pages(path):
 def pages_to_text(pages):
 
     return "\n".join(
-
         page["text"]
-
         for page in pages
-
     ).strip()
 
 
@@ -377,42 +375,36 @@ def detect_section(line):
         r"\b(required skills?|technical skills?|requirements?)\b",
         lower
     ):
-
         return "Required Skills"
 
     if re.search(
         r"\b(preferred skills?|preferred qualifications?|nice to have)\b",
         lower
     ):
-
         return "Preferred Skills"
 
     if re.search(
         r"\b(responsibilities|roles and responsibilities|key responsibilities)\b",
         lower
     ):
-
         return "Responsibilities"
 
     if re.search(
         r"\b(experience|work experience|professional experience)\b",
         lower
     ):
-
         return "Experience"
 
     if re.search(
         r"\b(education|educational qualification)\b",
         lower
     ):
-
         return "Education"
 
     if re.search(
         r"\b(certifications?|certification)\b",
         lower
     ):
-
         return "Certification"
 
     return None
@@ -433,7 +425,6 @@ def find_skill_matches(text):
         "airflow",
         "postgresql",
         "rest apis",
-
         "python",
         "sql",
         "etl",
@@ -441,7 +432,6 @@ def find_skill_matches(text):
         "docker",
         "fastapi",
         "flask",
-
         "machine learning",
         "scikit-learn",
         "pandas",
@@ -459,7 +449,6 @@ def find_skill_matches(text):
         "c++",
         "linux",
         "ci/cd",
-
         "aws"
     ]
 
@@ -505,18 +494,15 @@ def add_requirement(
 
     requirement = requirement.lower().strip()
 
-    # AWS S3 should not create a second standalone AWS
-    # requirement when both appear in the same source line.
+    source_lower = (
+        source_text or ""
+    ).lower()
 
-    if requirement == "aws":
-
-        source_lower = (
-            source_text or ""
-        ).lower()
-
-        if "s3" in source_lower:
-
-            return
+    if (
+        requirement == "aws"
+        and "s3" in source_lower
+    ):
+        return
 
     for item in requirements:
 
@@ -535,7 +521,6 @@ def add_requirement(
             if new_priority > old_priority:
 
                 item["category"] = category
-
                 item["source_text"] = source_text
 
             elif (
@@ -554,6 +539,7 @@ def add_requirement(
         "category": category,
 
         "source_text": source_text
+
     })
 
 
@@ -570,6 +556,7 @@ def extract_requirements(jd_text):
         for x in jd_text.splitlines()
 
         if clean_line(x)
+
     ]
 
     requirements = []
@@ -583,11 +570,9 @@ def extract_requirements(jd_text):
         if detected:
 
             current_section = detected
-
             continue
 
         if len(line) < 2:
-
             continue
 
         if line.lower() in {
@@ -614,9 +599,8 @@ def extract_requirements(jd_text):
                 current_section,
 
                 line
-            )
 
-    # Global skill detection
+            )
 
     for skill in find_skill_matches(jd_text):
 
@@ -629,11 +613,8 @@ def extract_requirements(jd_text):
             "Technical Skill",
 
             None
-        )
 
-    # ========================================================
-    # EDUCATION
-    # ========================================================
+        )
 
     education_patterns = [
 
@@ -646,6 +627,7 @@ def extract_requirements(jd_text):
         r"\bmaster(?:'s)?\s+degree\b",
         r"\bm\.?\s*sc\b",
         r"\bmca\b"
+
     ]
 
     education_source = None
@@ -661,11 +643,9 @@ def extract_requirements(jd_text):
             ):
 
                 education_source = line
-
                 break
 
         if education_source:
-
             break
 
     if education_source:
@@ -679,11 +659,8 @@ def extract_requirements(jd_text):
             "Education",
 
             education_source
-        )
 
-    # ========================================================
-    # EXPERIENCE
-    # ========================================================
+        )
 
     experience_patterns = [
 
@@ -694,6 +671,7 @@ def extract_requirements(jd_text):
         r"\b\d+\s*\+?\s*years?\s+experience\b",
 
         r"\bexperience\s+in\b"
+
     ]
 
     experience_source = None
@@ -709,11 +687,9 @@ def extract_requirements(jd_text):
             ):
 
                 experience_source = line
-
                 break
 
         if experience_source:
-
             break
 
     if experience_source:
@@ -727,23 +703,17 @@ def extract_requirements(jd_text):
             "Experience",
 
             experience_source
-        )
 
-    # ========================================================
-    # CERTIFICATION
-    # ========================================================
+        )
 
     certification_patterns = [
 
         r"\baws\s+cloud\s+practitioner\b",
-
         r"\bcloud\s+practitioner\b",
-
         r"\bcertified\b",
-
         r"\bcertification\b",
-
         r"\bcertificate\b"
+
     ]
 
     certification_source = None
@@ -759,11 +729,9 @@ def extract_requirements(jd_text):
             ):
 
                 certification_source = line
-
                 break
 
         if certification_source:
-
             break
 
     if certification_source:
@@ -777,6 +745,7 @@ def extract_requirements(jd_text):
             "Certification",
 
             certification_source
+
         )
 
     return requirements
@@ -796,6 +765,7 @@ def find_exact_evidence(
         requirement,
 
         [requirement]
+
     )
 
     aliases = sorted(
@@ -813,7 +783,6 @@ def find_exact_evidence(
             line = clean_line(raw_line)
 
             if not line:
-
                 continue
 
             for alias in aliases:
@@ -827,6 +796,7 @@ def find_exact_evidence(
                     )
 
                     + r"(?!\w)"
+
                 )
 
                 match = re.search(
@@ -834,20 +804,25 @@ def find_exact_evidence(
                     pattern,
 
                     line.lower()
+
                 )
 
                 if match:
 
                     return {
 
-                        "text": line[
-                            match.start():
-                            match.end()
-                        ].strip(),
+                        "text":
+                            line[
+                                match.start():
+                                match.end()
+                            ].strip(),
 
-                        "page": page_number,
+                        "page":
+                            page_number,
 
-                        "type": "EXACT"
+                        "type":
+                            "EXACT"
+
                     }
 
     return None
@@ -867,6 +842,7 @@ def find_related_evidence(
         requirement,
 
         []
+
     )
 
     related_terms = sorted(
@@ -876,6 +852,7 @@ def find_related_evidence(
         key=len,
 
         reverse=True
+
     )
 
     for page_data in resume_pages:
@@ -887,7 +864,6 @@ def find_related_evidence(
             line = clean_line(raw_line)
 
             if not line:
-
                 continue
 
             for term in related_terms:
@@ -901,6 +877,7 @@ def find_related_evidence(
                     )
 
                     + r"(?!\w)"
+
                 )
 
                 match = re.search(
@@ -908,20 +885,25 @@ def find_related_evidence(
                     pattern,
 
                     line.lower()
+
                 )
 
                 if match:
 
                     return {
 
-                        "text": line[
-                            match.start():
-                            match.end()
-                        ].strip(),
+                        "text":
+                            line[
+                                match.start():
+                                match.end()
+                            ].strip(),
 
-                        "page": page_number,
+                        "page":
+                            page_number,
 
-                        "type": "RELATED"
+                        "type":
+                            "RELATED"
+
                     }
 
     return None
@@ -931,27 +913,19 @@ def find_related_evidence(
 # EDUCATION EVIDENCE
 # ============================================================
 
-def find_education_evidence(
-    resume_pages
-):
+def find_education_evidence(resume_pages):
 
     patterns = [
 
         r"\bb\.?\s*tech\b",
-
         r"\bb\.?\s*e\.?\b",
-
         r"\bb\.?\s*sc\b",
-
         r"\bbca\b",
-
         r"\bbachelor(?:'s)?\b",
-
         r"\bm\.?\s*sc\b",
-
         r"\bmca\b",
-
         r"\bmaster(?:'s)?\b"
+
     ]
 
     for page_data in resume_pages:
@@ -963,7 +937,6 @@ def find_education_evidence(
             line = clean_line(raw_line)
 
             if not line:
-
                 continue
 
             for pattern in patterns:
@@ -975,17 +948,22 @@ def find_education_evidence(
                     line,
 
                     re.IGNORECASE
+
                 )
 
                 if match:
 
                     return {
 
-                        "text": match.group(0).strip(),
+                        "text":
+                            match.group(0).strip(),
 
-                        "page": page_number,
+                        "page":
+                            page_number,
 
-                        "type": "EXACT"
+                        "type":
+                            "EXACT"
+
                     }
 
     return None
@@ -995,21 +973,16 @@ def find_education_evidence(
 # CERTIFICATION EVIDENCE
 # ============================================================
 
-def find_certification_evidence(
-    resume_pages
-):
+def find_certification_evidence(resume_pages):
 
     patterns = [
 
         r"\baws\s+cloud\s+practitioner\b",
-
         r"\bcloud\s+practitioner\b",
-
         r"\baws\s+certified\b",
-
         r"\bcertified\b",
-
         r"\bcertification\b"
+
     ]
 
     for page_data in resume_pages:
@@ -1021,7 +994,6 @@ def find_certification_evidence(
             line = clean_line(raw_line)
 
             if not line:
-
                 continue
 
             for pattern in patterns:
@@ -1033,17 +1005,22 @@ def find_certification_evidence(
                     line,
 
                     re.IGNORECASE
+
                 )
 
                 if match:
 
                     return {
 
-                        "text": match.group(0).strip(),
+                        "text":
+                            match.group(0).strip(),
 
-                        "page": page_number,
+                        "page":
+                            page_number,
 
-                        "type": "EXACT"
+                        "type":
+                            "EXACT"
+
                     }
 
     return None
@@ -1056,7 +1033,6 @@ def find_certification_evidence(
 def extract_experience_range(text):
 
     if not text:
-
         return None
 
     range_match = re.search(
@@ -1066,6 +1042,7 @@ def extract_experience_range(text):
         text,
 
         re.IGNORECASE
+
     )
 
     if range_match:
@@ -1075,6 +1052,7 @@ def extract_experience_range(text):
             int(range_match.group(1)),
 
             int(range_match.group(2))
+
         )
 
     plus_match = re.search(
@@ -1084,6 +1062,7 @@ def extract_experience_range(text):
         text,
 
         re.IGNORECASE
+
     )
 
     if plus_match:
@@ -1093,6 +1072,7 @@ def extract_experience_range(text):
             int(plus_match.group(1)),
 
             None
+
         )
 
     single_match = re.search(
@@ -1102,24 +1082,30 @@ def extract_experience_range(text):
         text,
 
         re.IGNORECASE
+
     )
 
     if single_match:
 
         years = int(
+
             single_match.group(1)
+
         )
 
         return (
+
             years,
+
             years
+
         )
 
     return None
 
 
 # ============================================================
-# RESUME EXPERIENCE DURATION
+# EXPERIENCE EVIDENCE
 # ============================================================
 
 def find_explicit_experience_duration(
@@ -1135,6 +1121,7 @@ def find_explicit_experience_duration(
         r"\b(\d+)\s*years?\s+of\s+experience\b",
 
         r"\b(\d+)\s*years?\s+experience\b"
+
     ]
 
     for page_data in resume_pages:
@@ -1146,7 +1133,6 @@ def find_explicit_experience_duration(
             line = clean_line(raw_line)
 
             if not line:
-
                 continue
 
             for pattern in patterns:
@@ -1158,10 +1144,10 @@ def find_explicit_experience_duration(
                     line,
 
                     re.IGNORECASE
+
                 )
 
                 if not match:
-
                     continue
 
                 if match.lastindex == 2:
@@ -1188,22 +1174,28 @@ def find_explicit_experience_duration(
 
                 return {
 
-                    "text": match.group(0).strip(),
+                    "text":
+                        match.group(0).strip(),
 
-                    "page": page_number,
+                    "page":
+                        page_number,
 
-                    "type": "EXACT",
+                    "type":
+                        "EXACT",
 
-                    "min_years": minimum,
+                    "min_years":
+                        minimum,
 
-                    "max_years": maximum
+                    "max_years":
+                        maximum
+
                 }
 
     return None
 
 
 # ============================================================
-# GENERIC EXPERIENCE EVIDENCE
+# GENERIC EXPERIENCE
 # ============================================================
 
 def find_generic_experience_evidence(
@@ -1219,6 +1211,7 @@ def find_generic_experience_evidence(
         r"\b(?:web|software|python|java|data)\s+developer\b",
 
         r"\b(?:intern|internship)\b"
+
     ]
 
     for page_data in resume_pages:
@@ -1230,7 +1223,6 @@ def find_generic_experience_evidence(
             line = clean_line(raw_line)
 
             if not line:
-
                 continue
 
             for pattern in role_patterns:
@@ -1242,17 +1234,22 @@ def find_generic_experience_evidence(
                     line,
 
                     re.IGNORECASE
+
                 )
 
                 if match:
 
                     return {
 
-                        "text": match.group(0).strip(),
+                        "text":
+                            match.group(0).strip(),
 
-                        "page": page_number,
+                        "page":
+                            page_number,
 
-                        "type": "RELATED"
+                        "type":
+                            "RELATED"
+
                     }
 
     return None
@@ -1268,24 +1265,17 @@ def match_experience_requirement(
 ):
 
     jd_range = extract_experience_range(
-
         jd_source_text
     )
 
     explicit = find_explicit_experience_duration(
-
         resume_pages
     )
 
     if explicit:
 
-        candidate_min = explicit[
-            "min_years"
-        ]
-
-        candidate_max = explicit[
-            "max_years"
-        ]
+        candidate_min = explicit["min_years"]
+        candidate_max = explicit["max_years"]
 
         if jd_range:
 
@@ -1325,7 +1315,6 @@ def match_experience_requirement(
         )
 
     generic = find_generic_experience_evidence(
-
         resume_pages
     )
 
@@ -1345,11 +1334,12 @@ def match_experience_requirement(
             "page": None,
             "type": "NONE"
         }
+
     )
 
 
 # ============================================================
-# GENERAL EVIDENCE ENGINE
+# GENERAL EVIDENCE
 # ============================================================
 
 def find_evidence(
@@ -1362,10 +1352,10 @@ def find_evidence(
         requirement,
 
         resume_pages
+
     )
 
     if exact:
-
         return exact
 
     related = find_related_evidence(
@@ -1373,19 +1363,18 @@ def find_evidence(
         requirement,
 
         resume_pages
+
     )
 
     if related:
-
         return related
 
     return {
 
         "text": None,
-
         "page": None,
-
         "type": "NONE"
+
     }
 
 
@@ -1438,8 +1427,8 @@ def build_audit_reason(
 
             return (
                 "Relevant professional experience is indicated, "
-                "but the required data-engineering experience "
-                "and/or duration is not explicitly confirmed."
+                "but the required experience duration is not "
+                "explicitly confirmed."
             )
 
         return (
@@ -1469,10 +1458,6 @@ def deterministic_match(
     jd_source_text=None
 ):
 
-    # --------------------------------------------------------
-    # EXPERIENCE
-    # --------------------------------------------------------
-
     if requirement == "experience":
 
         return match_experience_requirement(
@@ -1480,72 +1465,79 @@ def deterministic_match(
             jd_source_text,
 
             resume_pages
-        )
 
-    # --------------------------------------------------------
-    # EDUCATION
-    # --------------------------------------------------------
+        )
 
     if requirement == "bachelor's degree":
 
         evidence = find_education_evidence(
 
             resume_pages
+
         )
 
         if evidence:
 
             return (
-                "MATCH",
-                evidence
-            )
 
-    # --------------------------------------------------------
-    # CERTIFICATION
-    # --------------------------------------------------------
+                "MATCH",
+
+                evidence
+
+            )
 
     if requirement == "certification":
 
         evidence = find_certification_evidence(
 
             resume_pages
+
         )
 
         if evidence:
 
             return (
-                "MATCH",
-                evidence
-            )
 
-    # --------------------------------------------------------
-    # EXACT / RELATED / NONE
-    # --------------------------------------------------------
+                "MATCH",
+
+                evidence
+
+            )
 
     evidence = find_evidence(
 
         requirement,
 
         resume_pages
+
     )
 
     if evidence["type"] == "EXACT":
 
         return (
+
             "MATCH",
+
             evidence
+
         )
 
     if evidence["type"] == "RELATED":
 
         return (
+
             "PARTIAL",
+
             evidence
+
         )
 
     return (
+
         "MISSING",
+
         evidence
+
     )
 
 
@@ -1553,39 +1545,398 @@ def deterministic_match(
 # SCORE
 # ============================================================
 
+def status_points(status):
+
+    return {
+
+        "MATCH": 1.0,
+        "PARTIAL": 0.5,
+        "MISSING": 0.0
+
+    }.get(
+
+        status,
+
+        0.0
+
+    )
+
+
 def calculate_score(results):
 
     if not results:
-
         return 0
-
-    points = {
-
-        "MATCH": 1.0,
-
-        "PARTIAL": 0.5,
-
-        "MISSING": 0.0
-    }
 
     total = sum(
 
-        points.get(
-            result["status"],
-            0
+        status_points(
+            result["status"]
         )
 
         for result in results
+
     )
 
     return round(
 
         total /
-
         len(results)
-
         * 100
+
     )
+
+
+# ============================================================
+# DEVELOPMENT GUIDANCE
+# ============================================================
+
+DEVELOPMENT_GUIDANCE = {
+
+    "sql": {
+
+        "title":
+            "SQL",
+
+        "develop":
+            "Learn SQL querying, joins, aggregation, "
+            "subqueries, filtering and database reporting.",
+
+        "reason":
+            "SQL is required by the job description "
+            "but direct SQL evidence was not found "
+            "in the resume.",
+
+        "type":
+            "SKILL"
+
+    },
+
+    "pyspark": {
+
+        "title":
+            "PySpark",
+
+        "develop":
+            "Learn PySpark DataFrames, transformations, "
+            "Spark SQL, partitioning and distributed "
+            "data processing.",
+
+        "reason":
+            "PySpark is required by the job description "
+            "but direct PySpark evidence was not found.",
+
+        "type":
+            "SKILL"
+
+    },
+
+    "aws": {
+
+        "title":
+            "AWS",
+
+        "develop":
+            "Learn AWS fundamentals, IAM, EC2, S3 "
+            "and cloud-based data workflows.",
+
+        "reason":
+            "AWS is required by the job description "
+            "but direct AWS evidence was not found.",
+
+        "type":
+            "SKILL"
+
+    },
+
+    "airflow": {
+
+        "title":
+            "Apache Airflow",
+
+        "develop":
+            "Learn DAGs, scheduling, task dependencies, "
+            "operators and workflow monitoring.",
+
+        "reason":
+            "Airflow is required for workflow orchestration "
+            "but direct Airflow evidence was not found.",
+
+        "type":
+            "SKILL"
+
+    },
+
+    "etl": {
+
+        "title":
+            "ETL / Data Pipelines",
+
+        "develop":
+            "Learn extract-transform-load workflows, "
+            "data cleaning, transformation and "
+            "pipeline design.",
+
+        "reason":
+            "The job requires ETL/data pipeline knowledge "
+            "but direct evidence was not found.",
+
+        "type":
+            "SKILL"
+
+    },
+
+    "aws s3": {
+
+        "title":
+            "AWS S3",
+
+        "develop":
+            "Learn S3 buckets, objects, permissions, "
+            "storage classes and cloud data storage "
+            "workflows.",
+
+        "reason":
+            "AWS S3 is specifically required for cloud "
+            "data storage but direct evidence was not found.",
+
+        "type":
+            "SKILL"
+
+    },
+
+    "certification": {
+
+        "title":
+            "Cloud Certification",
+
+        "develop":
+            "Consider an entry-level cloud certification "
+            "such as AWS Cloud Practitioner.",
+
+        "reason":
+            "The job description lists a preferred cloud "
+            "certification that is not evidenced in the resume.",
+
+        "type":
+            "CERTIFICATION"
+
+    }
+
+}
+
+
+# ============================================================
+# PROJECTED FIT
+# ============================================================
+
+def calculate_projected_fit(results):
+
+    total = len(results)
+
+    if total == 0:
+
+        return {
+
+            "current_score": 0,
+
+            "projected_score": 0,
+
+            "improvement": 0,
+
+            "development_count": 0,
+
+            "development_items": [],
+
+            "remaining_gaps": []
+
+        }
+
+    current_points = sum(
+
+        status_points(
+            item["status"]
+        )
+
+        for item in results
+
+    )
+
+    current_score = round(
+
+        current_points /
+        total
+        * 100,
+
+        1
+
+    )
+
+    developable = []
+
+    for item in results:
+
+        requirement = item["requirement"]
+
+        if (
+
+            item["status"] != "MATCH"
+
+            and
+
+            requirement in DEVELOPMENT_GUIDANCE
+
+        ):
+
+            gain = (
+
+                1.0 -
+
+                status_points(
+                    item["status"]
+                )
+
+            )
+
+            developable.append({
+
+                "item":
+                    item,
+
+                "gain":
+                    gain
+
+            })
+
+    projected_points = (
+
+        current_points +
+
+        sum(
+            item["gain"]
+            for item in developable
+        )
+
+    )
+
+    projected_score = round(
+
+        projected_points /
+        total
+        * 100,
+
+        1
+
+    )
+
+    improvement = round(
+
+        projected_score -
+        current_score,
+
+        1
+
+    )
+
+    development_items = []
+
+    for candidate in developable:
+
+        item = candidate["item"]
+
+        requirement = item["requirement"]
+
+        guidance = DEVELOPMENT_GUIDANCE[
+            requirement
+        ]
+
+        development_items.append({
+
+            "requirement":
+                requirement,
+
+            "title":
+                guidance["title"],
+
+            "category":
+                item["category"],
+
+            "current_status":
+                item["status"],
+
+            "develop":
+                guidance["develop"],
+
+            "reason":
+                guidance["reason"],
+
+            "type":
+                guidance["type"],
+
+            "point_gain":
+                candidate["gain"],
+
+            "projected_status":
+                "MATCH"
+
+        })
+
+    remaining = []
+
+    for item in results:
+
+        if item["status"] == "MATCH":
+            continue
+
+        if item["requirement"] not in DEVELOPMENT_GUIDANCE:
+
+            remaining.append({
+
+                "requirement":
+                    item["requirement"],
+
+                "category":
+                    item["category"],
+
+                "status":
+                    item["status"],
+
+                "reason":
+                    item.get(
+                        "audit_reason",
+                        "Additional evidence is required."
+                    )
+
+            })
+
+    return {
+
+        "current_score":
+            current_score,
+
+        "projected_score":
+            projected_score,
+
+        "improvement":
+            improvement,
+
+        "development_count":
+            len(development_items),
+
+        "development_items":
+            development_items,
+
+        "remaining_gaps":
+            remaining,
+
+        "projection_method":
+            "Scenario calculation assuming all currently "
+            "missing or partial learnable requirements become MATCH.",
+
+        "projection_note":
+            "Projected Fit is an evidence-based scenario, "
+            "not a guarantee of employment or selection."
+
+    }
 
 
 # ============================================================
@@ -1594,34 +1945,29 @@ def calculate_score(results):
 
 def extract_json_from_response(content):
 
+    if not content:
+        raise ValueError(
+            "Groq returned an empty response."
+        )
+
     content = content.strip()
 
     content = re.sub(
-
         r"^```json\s*",
-
         "",
-
         content,
-
         flags=re.IGNORECASE
     )
 
     content = re.sub(
-
         r"^```\s*",
-
         "",
-
         content
     )
 
     content = re.sub(
-
         r"\s*```$",
-
         "",
-
         content
     )
 
@@ -1634,23 +1980,19 @@ def extract_json_from_response(content):
         pass
 
     start = content.find("{")
-
     end = content.rfind("}")
 
     if (
-
         start != -1
-
-        and end != -1
-
-        and end > start
-
+        and
+        end != -1
+        and
+        end > start
     ):
 
         try:
 
             return json.loads(
-
                 content[
                     start:end + 1
                 ]
@@ -1666,7 +2008,7 @@ def extract_json_from_response(content):
 
 
 # ============================================================
-# GROQ EXPLANATION
+# LLM EXPLANATION
 # ============================================================
 
 def llm_explanation(
@@ -1679,12 +2021,10 @@ def llm_explanation(
 
         return {
 
-            "summary": (
-
+            "summary":
                 "LLM explanation is unavailable because "
                 "GROQ_API_KEY is not configured. "
-                "Evidence-based matching still works."
-            ),
+                "Evidence-based matching still works.",
 
             "gaps": [
 
@@ -1693,19 +2033,20 @@ def llm_explanation(
                 for r in results
 
                 if r["status"] != "MATCH"
+
             ],
 
             "questions": [
 
-                (
-                    f"Explain your experience with "
-                    f"{r['requirement']}."
-                )
+                f"Explain your experience with "
+                f"{r['requirement']}."
 
                 for r in results
 
                 if r["status"] != "MATCH"
+
             ][:7]
+
         }
 
     compact_results = json.dumps(
@@ -1713,6 +2054,7 @@ def llm_explanation(
         results,
 
         ensure_ascii=False
+
     )
 
     prompt = f"""
@@ -1723,62 +2065,20 @@ MATCH, PARTIAL, or MISSING.
 
 You MUST NOT change those statuses.
 
-Rules:
-
-MATCH:
-Direct evidence exists.
-
-PARTIAL:
-Related or incomplete evidence exists, but the requirement
-is not fully confirmed.
-
-MISSING:
-No meaningful evidence exists.
-
 Never invent resume information.
-
-Never invent:
-
-- skills
-- years
-- projects
-- employers
-- certifications
-- dates
-- achievements
-
-Never infer years of experience from graduation year.
-
-Never infer SQL merely from PostgreSQL.
-
-Never infer AWS merely from another cloud provider.
-
-Never infer PySpark merely from Spark.
-
-Never infer Git merely from GitHub.
-
-For the summary:
-Explain what is directly supported.
-
-For gaps:
-Include MISSING and PARTIAL requirements.
-
-For interview questions:
-Create questions specifically related to MISSING or PARTIAL
-requirements.
 
 Return ONLY valid JSON:
 
 {{
-  "summary": "short evidence-grounded explanation",
-  "gaps": [
-    "gap 1",
-    "gap 2"
-  ],
-  "questions": [
-    "question 1",
-    "question 2"
-  ]
+    "summary": "short evidence-grounded explanation",
+    "gaps": [
+        "gap 1",
+        "gap 2"
+    ],
+    "questions": [
+        "question 1",
+        "question 2"
+    ]
 }}
 
 Requirement results:
@@ -1808,23 +2108,27 @@ Job Description:
 
                 {
 
-                    "role": "system",
+                    "role":
+                        "system",
 
-                    "content": (
-                        "You provide concise,"
-                        "evidence-grounded"
-                        "candidate-role analysis."
-                        "Never invent resume facts."
-                    )
+                    "content":
+                        "Provide concise evidence-grounded "
+                        "resume analysis. Never invent facts."
+
                 },
 
                 {
 
-                    "role": "user",
+                    "role":
+                        "user",
 
-                    "content": prompt
+                    "content":
+                        prompt
+
                 }
+
             ]
+
         )
 
         content = (
@@ -1833,6 +2137,7 @@ Job Description:
             .choices[0]
             .message
             .content
+
         )
 
         result = extract_json_from_response(
@@ -1841,34 +2146,35 @@ Job Description:
 
         return {
 
-            "summary": str(
+            "summary":
+                str(
+                    result.get(
+                        "summary",
+                        "No AI summary was returned."
+                    )
+                ),
 
+            "gaps":
                 result.get(
-                    "summary",
-                    "No AI summary was returned."
+                    "gaps",
+                    []
+                ),
+
+            "questions":
+                result.get(
+                    "questions",
+                    []
                 )
-            ),
 
-            "gaps": result.get(
-                "gaps",
-                []
-            ),
-
-            "questions": result.get(
-                "questions",
-                []
-            )
         }
 
     except Exception as e:
 
         return {
 
-            "summary": (
-
+            "summary":
                 "AI explanation could not be generated. "
-                f"Reason: {str(e)}"
-            ),
+                f"Reason: {str(e)}",
 
             "gaps": [
 
@@ -1877,20 +2183,1423 @@ Job Description:
                 for r in results
 
                 if r["status"] != "MATCH"
+
             ],
 
             "questions": [
 
-                (
-                    f"Explain your experience with "
-                    f"{r['requirement']}."
-                )
+                f"Explain your experience with "
+                f"{r['requirement']}."
 
                 for r in results
 
                 if r["status"] != "MATCH"
+
             ][:7]
+
         }
+
+
+# ============================================================
+# TARGET SCORE CALCULATION
+# ============================================================
+
+def calculate_target_plan(
+    results,
+    current_score,
+    target_score
+):
+
+    total = len(results)
+
+    target_score = max(
+        0,
+        min(
+            100,
+            float(target_score)
+        )
+    )
+
+    if total == 0:
+
+        return {
+
+            "target":
+                target_score,
+
+            "current":
+                current_score,
+
+            "reachable_with_development":
+                False,
+
+            "required_improvement":
+                0,
+
+            "points_needed":
+                0,
+
+            "selected_requirements":
+                [],
+
+            "projected_score":
+                0,
+
+            "total_developable_requirements":
+                0
+
+        }
+
+    current_points = sum(
+
+        status_points(
+            item["status"]
+        )
+
+        for item in results
+
+    )
+
+    target_points = (
+
+        target_score /
+        100
+        * total
+
+    )
+
+    points_needed = max(
+
+        0,
+
+        target_points -
+        current_points
+
+    )
+
+    candidates = []
+
+    for item in results:
+
+        requirement = item["requirement"]
+
+        if (
+
+            item["status"] != "MATCH"
+
+            and
+
+            requirement in DEVELOPMENT_GUIDANCE
+
+        ):
+
+            gain = (
+
+                1.0 -
+
+                status_points(
+                    item["status"]
+                )
+
+            )
+
+            candidates.append({
+
+                "requirement":
+                    requirement,
+
+                "title":
+                    DEVELOPMENT_GUIDANCE[
+                        requirement
+                    ]["title"],
+
+                "status":
+                    item["status"],
+
+                "gain":
+                    gain,
+
+                "category":
+                    item["category"]
+
+            })
+
+    candidates.sort(
+
+        key=lambda x: (
+
+            -x["gain"],
+
+            -CATEGORY_PRIORITY.get(
+
+                x["category"],
+
+                0
+
+            )
+
+        )
+
+    )
+
+    selected = []
+
+    gained = 0.0
+
+    for candidate in candidates:
+
+        if gained >= points_needed:
+            break
+
+        selected.append(candidate)
+        gained += candidate["gain"]
+
+    projected_points = (
+
+        current_points +
+        gained
+
+    )
+
+    projected_score = round(
+
+        projected_points /
+        total
+        * 100,
+
+        1
+
+    )
+
+    reachable = (
+
+        projected_score >= target_score
+
+    )
+
+    return {
+
+        "target":
+            round(
+                target_score,
+                1
+            ),
+
+        "current":
+            round(
+                current_score,
+                1
+            ),
+
+        "required_improvement":
+            round(
+
+                points_needed /
+                total
+                * 100,
+
+                1
+
+            ),
+
+        "points_needed":
+            round(
+                points_needed,
+                2
+            ),
+
+        "selected_requirements":
+            selected,
+
+        "projected_score":
+            projected_score,
+
+        "reachable_with_development":
+            reachable,
+
+        "total_developable_requirements":
+            len(candidates)
+
+    }
+
+
+# ============================================================
+# CAREER AI FALLBACK HELPERS
+# ============================================================
+
+def get_gap_items(results):
+
+    return [
+
+        item
+
+        for item in results
+
+        if item.get("status") != "MATCH"
+
+    ]
+
+
+def get_development_items(
+    results,
+    development_plan
+):
+
+    items = []
+
+    existing = development_plan.get(
+        "development_items",
+        []
+    )
+
+    if existing:
+
+        return existing
+
+    for item in results:
+
+        requirement = item.get(
+            "requirement",
+            ""
+        )
+
+        if (
+            item.get("status") != "MATCH"
+            and
+            requirement in DEVELOPMENT_GUIDANCE
+        ):
+
+            guidance = DEVELOPMENT_GUIDANCE[
+                requirement
+            ]
+
+            items.append({
+
+                "requirement":
+                    requirement,
+
+                "title":
+                    guidance["title"],
+
+                "develop":
+                    guidance["develop"],
+
+                "reason":
+                    guidance["reason"],
+
+                "current_status":
+                    item.get(
+                        "status",
+                        "MISSING"
+                    )
+
+            })
+
+    return items
+
+
+def build_career_fallback(
+    question,
+    results,
+    current_score,
+    development_plan,
+    target_plan=None
+):
+
+    question_lower = question.lower().strip()
+
+    gaps = get_gap_items(results)
+
+    development_items = get_development_items(
+        results,
+        development_plan
+    )
+
+    # --------------------------------------------------------
+    # TARGET QUESTION
+    # --------------------------------------------------------
+
+    if target_plan:
+
+        target = target_plan["target"]
+        projected = target_plan["projected_score"]
+        reachable = target_plan[
+            "reachable_with_development"
+        ]
+
+        selected = target_plan[
+            "selected_requirements"
+        ]
+
+        lines = [
+
+            "✦ CAREER AI",
+            "",
+            "CURRENT SUITABILITY",
+            f"{current_score:.0f}% → {target:.0f}%",
+            "",
+            "TARGET"
+
+        ]
+
+        if reachable:
+
+            lines.append(
+                f"{target:.0f}% is reachable under the "
+                f"current scoring model."
+            )
+
+            if selected:
+
+                titles = [
+                    item["title"]
+                    for item in selected
+                ]
+
+                lines.append(
+                    "Focus on: "
+                    + ", ".join(titles[:6])
+                )
+
+            lines.append(
+                f"Projected suitability after those "
+                f"improvements: {projected:.1f}%."
+            )
+
+        else:
+
+            lines.append(
+                f"{target:.0f}% cannot currently be reached "
+                f"using only the identified development "
+                f"opportunities."
+            )
+
+            lines.append(
+                f"Maximum projected suitability from those "
+                f"opportunities: {projected:.1f}%."
+            )
+
+            if selected:
+
+                titles = [
+                    item["title"]
+                    for item in selected
+                ]
+
+                lines.append(
+                    "Current development areas: "
+                    + ", ".join(titles[:6])
+                )
+
+        lines.append(
+            "This is a scenario from the application's "
+            "scoring model, not a hiring prediction."
+        )
+
+        return "\n".join(lines)
+
+    # --------------------------------------------------------
+    # PROJECT QUESTION
+    # --------------------------------------------------------
+
+    project_words = [
+        "project",
+        "portfolio",
+        "build",
+        "what should i make",
+        "what can i build"
+    ]
+
+    if any(
+        word in question_lower
+        for word in project_words
+    ):
+
+        titles = [
+            item.get(
+                "title",
+                item.get(
+                    "requirement",
+                    ""
+                )
+            )
+
+            for item in development_items
+        ]
+
+        if titles:
+
+            skill_text = ", ".join(
+                titles[:5]
+            )
+
+            return "\n".join([
+
+                "✦ CAREER AI",
+                "",
+                "WHAT TO DO",
+                "Build one practical data pipeline project.",
+                f"Use the identified gaps: {skill_text}.",
+                "A useful project can combine SQL, PySpark, "
+                "ETL, Airflow and AWS S3.",
+                "Document exactly which technologies you used "
+                "so they can become resume evidence."
+
+            ])
+
+        return "\n".join([
+
+            "✦ CAREER AI",
+            "",
+            "WHAT TO DO",
+            "Build a project that demonstrates the "
+            "requirements already identified by the job.",
+            "Add clear technical evidence, measurable work "
+            "and project outcomes to the resume."
+
+        ])
+
+    # --------------------------------------------------------
+    # INTERVIEW QUESTION
+    # --------------------------------------------------------
+
+    interview_words = [
+        "interview",
+        "interview questions",
+        "prepare for interview",
+        "prepare me"
+    ]
+
+    if any(
+        word in question_lower
+        for word in interview_words
+    ):
+
+        lines = [
+
+            "✦ CAREER AI",
+            "",
+            "INTERVIEW PREPARATION"
+
+        ]
+
+        if gaps:
+
+            for index, item in enumerate(
+                gaps[:6],
+                start=1
+            ):
+
+                requirement = item.get(
+                    "requirement",
+                    "requirement"
+                )
+
+                lines.append(
+                    f"{index}. Be ready to explain your "
+                    f"experience with {requirement}."
+                )
+
+        else:
+
+            lines.append(
+                "No major requirement gaps were identified."
+            )
+
+            lines.append(
+                "Prepare examples from your resume for "
+                "each matched requirement."
+            )
+
+        return "\n".join(lines)
+
+    # --------------------------------------------------------
+    # WHY SCORE QUESTION
+    # --------------------------------------------------------
+
+    score_words = [
+        "why",
+        "score",
+        "percentage",
+        "low",
+        "suitability"
+    ]
+
+    if (
+        "score" in question_lower
+        or
+        "percentage" in question_lower
+        or
+        "suitability" in question_lower
+    ):
+
+        lines = [
+
+            "✦ CAREER AI",
+            "",
+            "CURRENT SUITABILITY",
+            f"{current_score:.0f}%",
+            "",
+            "KEY GAPS"
+
+        ]
+
+        if gaps:
+
+            for item in gaps[:7]:
+
+                requirement = item.get(
+                    "requirement",
+                    "Requirement"
+                )
+
+                status = item.get(
+                    "status",
+                    "MISSING"
+                )
+
+                lines.append(
+                    f"• {requirement} — {status.lower()}."
+                )
+
+        else:
+
+            lines.append(
+                "No unmatched requirements were identified."
+            )
+
+        return "\n".join(lines)
+
+    # --------------------------------------------------------
+    # LEARNING / SKILL QUESTION
+    # --------------------------------------------------------
+
+    learning_words = [
+        "learn",
+        "study",
+        "skill",
+        "skills",
+        "improve",
+        "improvement",
+        "gap",
+        "gaps",
+        "course",
+        "technology",
+        "technologies"
+    ]
+
+    if any(
+        word in question_lower
+        for word in learning_words
+    ):
+
+        lines = [
+
+            "✦ CAREER AI",
+            "",
+            "CURRENT SUITABILITY",
+            f"{current_score:.0f}%",
+            "",
+            "KEY GAPS"
+
+        ]
+
+        if gaps:
+
+            for item in gaps[:7]:
+
+                requirement = item.get(
+                    "requirement",
+                    "Requirement"
+                )
+
+                status = item.get(
+                    "status",
+                    "MISSING"
+                )
+
+                lines.append(
+                    f"• {requirement} — {status.lower()}."
+                )
+
+            lines.extend([
+
+                "",
+                "WHAT TO DO"
+
+            ])
+
+            for index, item in enumerate(
+                development_items[:6],
+                start=1
+            ):
+
+                title = item.get(
+                    "title",
+                    item.get(
+                        "requirement",
+                        "Skill"
+                    )
+                )
+
+                develop = item.get(
+                    "develop",
+                    "Build practical evidence for this requirement."
+                )
+
+                lines.append(
+                    f"{index}. {title} — {develop}"
+                )
+
+        else:
+
+            lines.append(
+                "No major development gaps were identified."
+            )
+
+        return "\n".join(lines)
+
+    # --------------------------------------------------------
+    # GENERAL FREE-FORM QUESTION
+    # --------------------------------------------------------
+
+    lines = [
+
+        "✦ CAREER AI",
+        "",
+        "CURRENT SUITABILITY",
+        f"{current_score:.0f}%",
+        "",
+        "ANSWER"
+
+    ]
+
+    if gaps:
+
+        lines.append(
+            "Your question is being answered using the "
+            "requirements and evidence from this analysis."
+        )
+
+        first_gap = gaps[0]
+
+        lines.append(
+            f"Relevant current gap: "
+            f"{first_gap.get('requirement', 'requirement')} "
+            f"({first_gap.get('status', 'MISSING').lower()})."
+        )
+
+        if development_items:
+
+            first_development = development_items[0]
+
+            lines.append(
+                f"Suggested development area: "
+                f"{first_development.get('title', 'identified gap')}."
+            )
+
+    else:
+
+        lines.append(
+            "No major requirement gaps were identified "
+            "in the current analysis."
+        )
+
+    return "\n".join(lines)
+
+
+# ============================================================
+# CAREER AI TEXT CLEANUP
+# ============================================================
+
+def clean_career_answer(answer):
+
+    if not answer:
+        return ""
+
+    answer = str(answer)
+
+    answer = answer.replace(
+        "**",
+        ""
+    )
+
+    answer = answer.replace(
+        "###",
+        ""
+    )
+
+    answer = answer.replace(
+        "##",
+        ""
+    )
+
+    answer = answer.replace(
+        "#",
+        ""
+    )
+
+    answer = answer.replace(
+        "```",
+        ""
+    )
+
+    answer = answer.replace(
+        "\\#",
+        ""
+    )
+
+    answer = answer.replace(
+        "\\*",
+        ""
+    )
+
+    answer = re.sub(
+        r"\n{3,}",
+        "\n\n",
+        answer
+    )
+
+    return answer.strip()
+
+
+# ============================================================
+# CAREER AI
+# ============================================================
+
+@app.post("/career-chat")
+def career_chat():
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    question = str(
+
+        data.get(
+            "question",
+            ""
+        )
+
+    ).strip()
+
+    context = data.get(
+        "context",
+        {}
+    )
+
+    history = data.get(
+        "history",
+        []
+    )
+
+    if not question:
+
+        return jsonify({
+
+            "error":
+                "Please enter a career question."
+
+        }), 400
+
+    if len(question) > 1000:
+
+        return jsonify({
+
+            "error":
+                "Question is too long. Maximum is 1000 characters."
+
+        }), 400
+
+    results = context.get(
+        "results",
+        []
+    )
+
+    development_plan = context.get(
+        "development_plan",
+        {}
+    ) or {}
+
+    current_score = float(
+
+        context.get(
+            "current_score",
+            0
+        )
+
+        or 0
+
+    )
+
+    # --------------------------------------------------------
+    # TARGET DETECTION
+    # --------------------------------------------------------
+
+    target_match = re.search(
+
+        r"\b(\d{1,3})\s*%",
+
+        question
+
+    )
+
+    target_plan = None
+
+    if target_match:
+
+        target_score = float(
+
+            target_match.group(1)
+
+        )
+
+        target_score = max(
+
+            0,
+
+            min(
+                100,
+                target_score
+            )
+
+        )
+
+        target_plan = calculate_target_plan(
+
+            results,
+
+            current_score,
+
+            target_score
+
+        )
+
+    # --------------------------------------------------------
+    # ALWAYS BUILD FALLBACK
+    # --------------------------------------------------------
+
+    fallback_answer = build_career_fallback(
+
+        question,
+
+        results,
+
+        current_score,
+
+        development_plan,
+
+        target_plan
+
+    )
+
+    # --------------------------------------------------------
+    # IF GROQ IS NOT CONFIGURED
+    # RETURN FALLBACK INSTEAD OF ERROR
+    # --------------------------------------------------------
+
+    if not client:
+
+        return jsonify({
+
+            "answer":
+                fallback_answer,
+
+            "target_plan":
+                target_plan,
+
+            "source":
+                "deterministic_fallback"
+
+        })
+
+    # --------------------------------------------------------
+    # COMPACT RESULTS
+    # --------------------------------------------------------
+
+    compact_results = []
+
+    for item in results:
+
+        compact_results.append({
+
+            "requirement":
+                item.get(
+                    "requirement",
+                    ""
+                ),
+
+            "category":
+                item.get(
+                    "category",
+                    ""
+                ),
+
+            "status":
+                item.get(
+                    "status",
+                    ""
+                ),
+
+            "resume_evidence":
+                item.get(
+                    "resume_evidence",
+                    ""
+                ),
+
+            "resume_page":
+                item.get(
+                    "resume_page",
+                    None
+                ),
+
+            "evidence_type":
+                item.get(
+                    "evidence_type",
+                    ""
+                ),
+
+            "jd_evidence":
+                item.get(
+                    "jd_evidence",
+                    ""
+                ),
+
+            "audit_reason":
+                item.get(
+                    "audit_reason",
+                    ""
+                )
+
+        })
+
+    # --------------------------------------------------------
+    # DEVELOPMENT DATA
+    # --------------------------------------------------------
+
+    development_items = (
+
+        development_plan.get(
+
+            "development_items",
+
+            []
+
+        )
+
+    )
+
+    development_context = []
+
+    for item in development_items:
+
+        development_context.append({
+
+            "requirement":
+                item.get(
+                    "requirement",
+                    ""
+                ),
+
+            "title":
+                item.get(
+                    "title",
+                    ""
+                ),
+
+            "category":
+                item.get(
+                    "category",
+                    ""
+                ),
+
+            "current_status":
+                item.get(
+                    "current_status",
+                    ""
+                ),
+
+            "develop":
+                item.get(
+                    "develop",
+                    ""
+                ),
+
+            "reason":
+                item.get(
+                    "reason",
+                    ""
+                ),
+
+            "point_gain":
+                item.get(
+                    "point_gain",
+                    0
+                )
+
+        })
+
+    # --------------------------------------------------------
+    # TARGET CONTEXT
+    # --------------------------------------------------------
+
+    target_instruction = ""
+
+    if target_plan:
+
+        selected = target_plan[
+            "selected_requirements"
+        ]
+
+        selected_text = "\n".join(
+
+            f"- {item['title']} "
+            f"({item['status']}, "
+            f"+{item['gain']} point)"
+
+            for item in selected
+
+        )
+
+        if not selected_text:
+
+            selected_text = (
+                "No currently developable requirement "
+                "was identified for this target."
+            )
+
+        target_instruction = f"""
+
+TARGET CALCULATION
+
+Current suitability:
+{target_plan['current']}%
+
+Requested target:
+{target_plan['target']}%
+
+Points needed:
+{target_plan['points_needed']}
+
+Requirements selected by the scoring engine:
+
+{selected_text}
+
+Projected suitability:
+{target_plan['projected_score']}%
+
+Reachable:
+{target_plan['reachable_with_development']}
+
+IMPORTANT:
+
+Use these exact calculated values.
+
+Do not invent percentage increases.
+
+Do not say that every skill gives a fixed percentage.
+
+Do not promise hiring or selection.
+"""
+
+    # --------------------------------------------------------
+    # SAFE HISTORY
+    # --------------------------------------------------------
+
+    safe_history = []
+
+    if isinstance(
+        history,
+        list
+    ):
+
+        for item in history[-6:]:
+
+            if not isinstance(
+                item,
+                dict
+            ):
+
+                continue
+
+            role = item.get(
+                "role",
+                ""
+            )
+
+            content = str(
+
+                item.get(
+                    "content",
+                    ""
+                )
+
+            )[:2000]
+
+            if (
+
+                role in {
+                    "user",
+                    "assistant"
+                }
+
+                and
+
+                content
+
+            ):
+
+                safe_history.append({
+
+                    "role":
+                        role,
+
+                    "content":
+                        content
+
+                })
+
+    # ========================================================
+    # IMPROVED FREE-FORM CAREER AI PROMPT
+    # ========================================================
+
+    prompt = f"""
+You are Career AI inside an explainable
+Candidate-Role Fit Engine.
+
+The user may ask ANY free-form career question.
+
+Do NOT restrict yourself to suggested questions.
+
+Answer the actual user question directly.
+
+User question:
+
+{question}
+
+Current suitability:
+{current_score}%
+
+Resume/job analysis data:
+
+{json.dumps(
+    compact_results,
+    ensure_ascii=False,
+    indent=2
+)}
+
+Development opportunities:
+
+{json.dumps(
+    development_context,
+    ensure_ascii=False,
+    indent=2
+)}
+
+{target_instruction}
+
+IMPORTANT RULES:
+
+1. The user can ask any career-related question.
+
+2. Answer questions about skills, gaps, score,
+learning paths, projects, certifications, resume evidence,
+interview preparation and career development.
+
+3. MATCH, PARTIAL and MISSING values from the
+deterministic engine are authoritative.
+
+4. Never invent resume information.
+
+5. Never claim a skill is present when the evidence
+does not show it.
+
+6. A related skill is not the same as an exact skill.
+
+7. If the user asks about improving the score,
+use the application's calculated values.
+
+8. If the user asks for a target percentage,
+use the exact target calculation supplied above.
+
+9. Never invent percentage gains.
+
+10. If the requested target is unreachable using the
+currently identified development opportunities,
+clearly say so.
+
+11. You may answer questions that are NOT related
+to the suggested question buttons, as long as they
+can be answered using the provided career context.
+
+12. If the question cannot be answered from the
+available resume/job context, say what information
+is missing instead of inventing an answer.
+
+13. Do not promise hiring, selection or employment.
+
+14. Keep the response concise but actually answer
+the question.
+
+15. Return plain text only.
+
+16. Do not use Markdown.
+
+17. Do not use:
+##
+###
+**
+backticks
+Markdown tables
+
+18. Put every section on a separate line.
+
+19. Put every bullet on a separate line.
+
+20. Do not return an empty response.
+
+Example structure:
+
+✦ CAREER AI
+
+ANSWER
+Direct answer to the user's question.
+
+WHAT TO DO
+1. First practical step.
+2. Second practical step.
+
+TARGET
+Only include this section when relevant.
+"""
+
+    # --------------------------------------------------------
+    # GROQ CALL
+    # --------------------------------------------------------
+
+    try:
+
+        messages = [
+
+            {
+
+                "role":
+                    "system",
+
+                "content":
+                    (
+                        "You are a free-form Career AI assistant. "
+                        "Answer the user's actual question. "
+                        "Do not restrict answers to suggested questions. "
+                        "Use only the supplied resume/job evidence. "
+                        "Return plain text only. "
+                        "Never use Markdown. "
+                        "Never use ## or **. "
+                        "Never return an empty response."
+                    )
+
+            }
+
+        ]
+
+        messages.extend(
+            safe_history
+        )
+
+        messages.append({
+
+            "role":
+                "user",
+
+            "content":
+                prompt
+
+        })
+
+        response = client.chat.completions.create(
+
+            model=GROQ_MODEL,
+
+            temperature=0.2,
+
+            max_completion_tokens=1200,
+
+            messages=messages
+
+        )
+
+        answer = ""
+
+        if response.choices:
+
+            message = response.choices[0].message
+
+            if message:
+
+                answer = (
+                    message.content
+                    or ""
+                )
+
+        answer = clean_career_answer(
+            answer
+        )
+
+        # ----------------------------------------------------
+        # CRITICAL FIX
+        # IF GROQ RETURNS EMPTY, USE FALLBACK
+        # ----------------------------------------------------
+
+        if not answer:
+
+            answer = fallback_answer
+
+            source = "deterministic_fallback"
+
+        else:
+
+            source = "groq"
+
+        return jsonify({
+
+            "answer":
+                answer,
+
+            "target_plan":
+                target_plan,
+
+            "source":
+                source
+
+        })
+
+    # --------------------------------------------------------
+    # GROQ ERROR FALLBACK
+    # --------------------------------------------------------
+
+    except Exception as e:
+
+        print(
+            "Career AI Groq error:",
+            str(e)
+        )
+
+        return jsonify({
+
+            "answer":
+                fallback_answer,
+
+            "target_plan":
+                target_plan,
+
+            "source":
+                "deterministic_fallback",
+
+            "ai_warning":
+                "Groq was unavailable, so the application "
+                "used its evidence-based fallback response."
+
+        })
 
 
 # ============================================================
@@ -1900,7 +3609,9 @@ Job Description:
 def initialize_database():
 
     db = sqlite3.connect(
+
         DB_DIR / "app.db"
+
     )
 
     db.execute("""
@@ -1919,6 +3630,7 @@ def initialize_database():
 
             created_at DATETIME
                 DEFAULT CURRENT_TIMESTAMP
+
         )
 
     """)
@@ -1936,7 +3648,9 @@ def save_evaluation(
 ):
 
     db = sqlite3.connect(
+
         DB_DIR / "app.db"
+
     )
 
     db.execute("""
@@ -1948,7 +3662,6 @@ def save_evaluation(
             score,
             results_json
         )
-
         VALUES (?, ?, ?, ?)
 
     """, (
@@ -1963,6 +3676,7 @@ def save_evaluation(
             results,
             ensure_ascii=False
         )
+
     ))
 
     db.commit()
@@ -1983,7 +3697,7 @@ def home():
 
 
 # ============================================================
-# HEALTH CHECK
+# HEALTH
 # ============================================================
 
 @app.route("/health")
@@ -1991,20 +3705,22 @@ def health():
 
     return jsonify({
 
-        "status": "ok",
+        "status":
+            "ok",
 
-        "application": (
-            "GA-04 Explainable "
-            "Candidate-Role Fit Engine"
-        ),
+        "application":
+            "GA-04 Explainable Candidate-Role Fit Engine",
 
-        "matching": "deterministic",
+        "matching":
+            "deterministic",
 
-        "genai": (
-            "enabled"
-            if client
-            else "not configured"
-        )
+        "genai":
+            (
+                "enabled"
+                if client
+                else "not configured"
+            )
+
     })
 
 
@@ -2019,34 +3735,37 @@ def analyze():
 
         "resume" not in request.files
 
-        or "job" not in request.files
+        or
+
+        "job" not in request.files
 
     ):
 
         return jsonify({
 
-            "error": (
+            "error":
                 "Please upload both a resume PDF "
                 "and a job description PDF."
-            )
 
         }), 400
 
     resume = request.files["resume"]
-
     job = request.files["job"]
 
     if (
 
         not resume.filename.lower().endswith(".pdf")
 
-        or not job.filename.lower().endswith(".pdf")
+        or
+
+        not job.filename.lower().endswith(".pdf")
 
     ):
 
         return jsonify({
 
-            "error": "Only PDF files are supported."
+            "error":
+                "Only PDF files are supported."
 
         }), 400
 
@@ -2078,9 +3797,9 @@ def analyze():
 
     try:
 
-        # ====================================================
-        # PDF EXTRACTION
-        # ====================================================
+        # ----------------------------------------------------
+        # EXTRACT PDFs
+        # ----------------------------------------------------
 
         resume_pages = extract_pdf_pages(
             resume_path
@@ -2102,10 +3821,9 @@ def analyze():
 
             return jsonify({
 
-                "error": (
+                "error":
                     "No readable text found "
                     "in the resume PDF."
-                )
 
             }), 400
 
@@ -2113,26 +3831,25 @@ def analyze():
 
             return jsonify({
 
-                "error": (
+                "error":
                     "No readable text found "
                     "in the job description PDF."
-                )
 
             }), 400
 
-        # ====================================================
+        # ----------------------------------------------------
         # REQUIREMENTS
-        # ====================================================
+        # ----------------------------------------------------
 
         requirements = extract_requirements(
             jd_text
         )
 
-        # ====================================================
-        # MATCH EACH REQUIREMENT
-        # ====================================================
-
         results = []
+
+        # ----------------------------------------------------
+        # MATCH REQUIREMENTS
+        # ----------------------------------------------------
 
         for requirement_data in requirements:
 
@@ -2162,6 +3879,7 @@ def analyze():
                     resume_pages,
 
                     jd_source_text
+
                 )
             )
 
@@ -2188,69 +3906,81 @@ def analyze():
                 resume_evidence,
 
                 jd_source_text
-            )
 
-            # =================================================
-            # AUDIT OBJECT
-            # =================================================
+            )
 
             audit = {
 
-                "decision": status,
+                "decision":
+                    status,
 
-                "evidence_type": evidence_type,
+                "evidence_type":
+                    evidence_type,
 
-                "reason": audit_reason,
+                "reason":
+                    audit_reason,
 
-                "jd_evidence": (
-                    jd_source_text
-                ),
+                "jd_evidence":
+                    jd_source_text,
 
-                "resume_evidence": (
-                    resume_evidence
-                ),
+                "resume_evidence":
+                    resume_evidence,
 
-                "resume_page": page
+                "resume_page":
+                    page
+
             }
 
             results.append({
 
-                "requirement": requirement,
+                "requirement":
+                    requirement,
 
-                "category": category,
+                "category":
+                    category,
 
-                "status": status,
+                "status":
+                    status,
 
-                "jd_evidence": (
-                    jd_source_text
-                ),
+                "jd_evidence":
+                    jd_source_text,
 
-                "resume_evidence": (
-                    resume_evidence
-                ),
+                "resume_evidence":
+                    resume_evidence,
 
-                "resume_page": page,
+                "resume_page":
+                    page,
 
-                "evidence_type": (
-                    evidence_type
-                ),
+                "evidence_type":
+                    evidence_type,
 
-                "audit_reason": audit_reason,
+                "audit_reason":
+                    audit_reason,
 
-                "audit": audit
+                "audit":
+                    audit
+
             })
 
-        # ====================================================
+        # ----------------------------------------------------
         # SCORE
-        # ====================================================
+        # ----------------------------------------------------
 
         score = calculate_score(
             results
         )
 
-        # ====================================================
-        # AI
-        # ====================================================
+        # ----------------------------------------------------
+        # DEVELOPMENT
+        # ----------------------------------------------------
+
+        development_plan = calculate_projected_fit(
+            results
+        )
+
+        # ----------------------------------------------------
+        # AI EXPLANATION
+        # ----------------------------------------------------
 
         explanation = llm_explanation(
 
@@ -2259,11 +3989,12 @@ def analyze():
             resume_text,
 
             jd_text
+
         )
 
-        # ====================================================
+        # ----------------------------------------------------
         # DATABASE
-        # ====================================================
+        # ----------------------------------------------------
 
         save_evaluation(
 
@@ -2274,58 +4005,75 @@ def analyze():
             score,
 
             results
+
         )
 
-        # ====================================================
+        # ----------------------------------------------------
         # RESPONSE
-        # ====================================================
+        # ----------------------------------------------------
 
         return jsonify({
 
-            "resume": resume.filename,
+            "resume":
+                resume.filename,
 
-            "job": job.filename,
+            "job":
+                job.filename,
 
-            "score": score,
+            "score":
+                score,
 
-            "requirements_count": len(
-                results
-            ),
+            "requirements_count":
+                len(results),
 
-            "results": results,
+            "results":
+                results,
 
-            "explanation": explanation,
+            "explanation":
+                explanation,
 
-            "bias_note": (
+            "development_plan":
+                development_plan,
 
-                "Matching uses job-related evidence "
-                "such as skills, education and experience. "
-                "Name, gender, age, photo, religion, "
-                "marital status and address are not used."
-            ),
+            "bias_note":
+                (
+                    "Matching uses job-related evidence "
+                    "such as skills, education and experience. "
+                    "Name, gender, age, photo, religion, "
+                    "marital status and address are not used."
+                ),
 
             "engine": {
 
-                "matching": (
-                    "deterministic"
-                ),
+                "matching":
+                    "deterministic",
 
-                "scoring": (
-                    "MATCH=1, PARTIAL=0.5, MISSING=0"
-                ),
+                "scoring":
+                    "MATCH=1, PARTIAL=0.5, MISSING=0",
 
-                "llm_role": (
-                    "explanation, gap analysis "
-                    "and interview preparation"
-                )
+                "llm_role":
+                    (
+                        "explanation, gap analysis "
+                        "and interview preparation"
+                    ),
+
+                "development_projection":
+                    (
+                        "Scenario-based calculation of "
+                        "potential fit after completing "
+                        "learnable missing requirements."
+                    )
+
             }
+
         })
 
     except Exception as e:
 
         return jsonify({
 
-            "error": str(e)
+            "error":
+                str(e)
 
         }), 500
 
@@ -2339,16 +4087,14 @@ def file_too_large(error):
 
     return jsonify({
 
-        "error": (
-            "File too large. "
-            "Maximum size is 10 MB."
-        )
+        "error":
+            "File too large. Maximum size is 10 MB."
 
     }), 413
 
 
 # ============================================================
-# INITIALIZE DATABASE
+# DATABASE INITIALIZATION
 # ============================================================
 
 initialize_database()
