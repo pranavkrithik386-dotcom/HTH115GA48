@@ -30,8 +30,33 @@ form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     results.classList.add("hidden");
+    careerPathway.classList.add("hidden");
+    currentCareerContext = null;
+    careerChatHistory = [];
     errorBox.classList.add("hidden");
     loading.classList.remove("hidden");
+
+    const resumeFile = document.getElementById("resume").files[0];
+    const jobFile = document.getElementById("job").files[0];
+
+    if (
+        !resumeFile
+        ||
+        !jobFile
+        ||
+        !resumeFile.name.toLowerCase().endsWith(".pdf")
+        ||
+        !jobFile.name.toLowerCase().endsWith(".pdf")
+    ) {
+
+        errorBox.textContent =
+            "INVALID FILE TYPE — Please upload a supported document.";
+
+        errorBox.classList.remove("hidden");
+        loading.classList.add("hidden");
+
+        return;
+    }
 
     const data = new FormData(form);
 

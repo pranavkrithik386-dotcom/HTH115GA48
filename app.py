@@ -366,6 +366,179 @@ def pages_to_text(pages):
 
 
 # ============================================================
+# DOCUMENT VALIDATION
+# ============================================================
+
+RESUME_SECTION_PATTERNS = {
+    "education": r"\beducation(?:al)?\b|\bdegree\b|\buniversity\b|\bcollege\b",
+    "experience": r"\b(?:work|professional|employment)?\s*experience\b|\bwork history\b",
+    "skills": r"\bskills?\b|\btechnologies\b|\btechnical proficienc",
+    "projects": r"\bprojects?\b|\bportfolio\b",
+    "certifications": r"\bcertifications?\b|\blicenses?\b",
+    "summary": r"\bsummary\b|\bobjective\b|\bprofile\b"
+}
+
+JOB_SIGNAL_PATTERNS = {
+    "responsibilities": r"\bresponsibilit(?:y|ies)\b|\bduties\b|\bresponsible for\b|\byou will\b",
+    "requirements": r"\brequirements?\b|\bmust have\b|\bmust be\b|\brequired\b",
+    "qualifications": r"\bqualifications?\b|\bpreferred\b|\bnice to have\b",
+    "skills": r"\bskills?\b|\btechnical skills?\b|\bproficienc",
+    "experience": r"\b\d+\+?\s+years?\b|\bexperience required\b|\bexperience in\b",
+    "role_context": r"\b(?:job|open)\s+title\b|\bposition\b|\brole\b|\bcareer opportunity\b",
+    "work_context": r"\blocation\b|\bremote\b|\bhybrid\b|\bon[- ]site\b|\bemployment type\b|\bsalary\b|\bcompensation\b|\babout (?:the )?(?:role|company)\b"
+}
+
+
+def _normalized_text(text):
+
+    return re.sub(
+        r"\s+",
+        " ",
+        (text or "").lower()
+    ).strip()
+
+
+def _matched_patterns(text, patterns):
+
+    normalized = _normalized_text(text)
+
+    return {
+        name
+        for name, pattern in patterns.items()
+        if re.search(pattern, normalized)
+    }
+
+
+def _resume_profile(text):
+
+    normalized = _normalized_text(text)
+    sections = _matched_patterns(
+        normalized,
+        RESUME_SECTION_PATTERNS
+    )
+    contact = bool(
+        re.search(r"\b[\w.+-]+@[\w.-]+\.[a-z]{2,}\b", normalized)
+        or re.search(r"(?:\+?\d[\d\s().-]{7,}\d)", normalized)
+        or re.search(r"\b(?:linkedin|github)\.com\b", normalized)
+    )
+    identity = bool(
+        re.search(r"\b(?:resume|curriculum vitae|cv)\b", normalized)
+        or contact
+    )
+    score = len(sections) + int(contact) + int(identity)
+
+    return {
+        "score": score,
+        "sections": sections,
+        "contact": contact,
+        "identity": identity
+    }
+
+
+def _job_profile(text):
+
+    normalized = _normalized_text(text)
+    signals = _matched_patterns(
+        normalized,
+        JOB_SIGNAL_PATTERNS
+    )
+    title = bool(
+        re.search(
+            r"\b(?:engineer|developer|analyst|manager|designer|specialist|"
+            r"consultant|scientist|administrator|coordinator|architect|"
+            r"technician|intern|director|lead|officer)\b",
+            normalized
+        )
+    )
+    score = len(signals) + int(title)
+
+    return {
+        "score": score,
+        "signals": signals,
+        "title": title
+    }
+
+
+def validate_resume_document(text):
+
+    resume = _resume_profile(text)
+    job = _job_profile(text)
+    resume_core = len(
+        resume["sections"].intersection({
+            "experience",
+            "skills",
+            "projects",
+            "education"
+        })
+    )
+    job_core = len(
+        job["signals"].intersection({
+            "responsibilities",
+            "requirements",
+            "qualifications",
+            "experience"
+        })
+    )
+
+    if job["score"] >= resume["score"] + 3 and job_core >= 2:
+        return (
+            "INVALID RESUME — This document appears to be a Job Description. "
+            "Please upload a candidate resume."
+        )
+
+    if (
+        len(_normalized_text(text)) < 60
+        or resume["score"] < 3
+        or (resume_core == 0 and not resume["contact"])
+    ):
+        return (
+            "INVALID RESUME — This document does not contain enough resume "
+            "content. Please upload a candidate resume."
+        )
+
+    return None
+
+
+def validate_job_document(text):
+
+    job = _job_profile(text)
+    resume = _resume_profile(text)
+    job_core = len(
+        job["signals"].intersection({
+            "responsibilities",
+            "requirements",
+            "qualifications",
+            "experience"
+        })
+    )
+
+    if resume["score"] >= job["score"] + 3 and len(
+        resume["sections"].intersection({
+            "experience",
+            "skills",
+            "projects",
+            "education"
+        })
+    ) >= 2:
+        return (
+            "INVALID JOB DESCRIPTION — This document appears to be a Resume. "
+            "Please upload a job description."
+        )
+
+    if (
+        len(_normalized_text(text)) < 60
+        or job["score"] < 3
+        or job_core == 0
+    ):
+        return (
+            "INVALID JOB DESCRIPTION — This document does not contain enough "
+            "job description content. Please upload a job description."
+        )
+
+    return None
+
+
+# ============================================================
 # SECTION DETECTION
 # ============================================================
 
@@ -3960,19 +4133,33 @@ def analyze():
     job = request.files["job"]
 
     if (
-
-        not resume.filename.lower().endswith(".pdf")
-
+        Path(resume.filename or "").suffix.lower() != ".pdf"
         or
-
-        not job.filename.lower().endswith(".pdf")
-
+        Path(job.filename or "").suffix.lower() != ".pdf"
     ):
 
         return jsonify({
 
             "error":
-                "Only PDF files are supported."
+                "INVALID FILE TYPE — Please upload a supported document."
+
+        }), 400
+
+    resume_header = resume.stream.read(5)
+    resume.stream.seek(0)
+    job_header = job.stream.read(5)
+    job.stream.seek(0)
+
+    if (
+        resume_header != b"%PDF-"
+        or
+        job_header != b"%PDF-"
+    ):
+
+        return jsonify({
+
+            "error":
+                "INVALID FILE TYPE — Please upload a supported document."
 
         }), 400
 
@@ -4008,13 +4195,24 @@ def analyze():
         # EXTRACT PDFs
         # ----------------------------------------------------
 
-        resume_pages = extract_pdf_pages(
-            resume_path
-        )
+        try:
 
-        job_pages = extract_pdf_pages(
-            job_path
-        )
+            resume_pages = extract_pdf_pages(
+                resume_path
+            )
+
+            job_pages = extract_pdf_pages(
+                job_path
+            )
+
+        except Exception:
+
+            return jsonify({
+
+                "error":
+                    "INVALID FILE TYPE — Please upload a supported document."
+
+            }), 400
 
         resume_text = pages_to_text(
             resume_pages
@@ -4022,6 +4220,16 @@ def analyze():
 
         jd_text = pages_to_text(
             job_pages
+        )
+
+        print(
+            "Resume text length:",
+            len(resume_text)
+        )
+
+        print(
+            "JD text length:",
+            len(jd_text)
         )
 
         if not resume_text:
@@ -4041,6 +4249,42 @@ def analyze():
                 "error":
                     "No readable text found "
                     "in the job description PDF."
+
+            }), 400
+
+        resume_validation_error = validate_resume_document(
+            resume_text
+        )
+
+        print(
+            "Resume validation:",
+            resume_validation_error or "valid"
+        )
+
+        if resume_validation_error:
+
+            return jsonify({
+
+                "error":
+                    resume_validation_error
+
+            }), 400
+
+        job_validation_error = validate_job_document(
+            jd_text
+        )
+
+        print(
+            "JD validation:",
+            job_validation_error or "valid"
+        )
+
+        if job_validation_error:
+
+            return jsonify({
+
+                "error":
+                    job_validation_error
 
             }), 400
 
