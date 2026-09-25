@@ -2038,7 +2038,6 @@ def build_career_pathway(results, location):
 # ============================================================
 # PROJECTED FIT
 # ============================================================
-
 def calculate_projected_fit(results):
 
     total = len(results)
@@ -2057,14 +2056,24 @@ def calculate_projected_fit(results):
 
             "development_items": [],
 
-            "remaining_gaps": []
+            "remaining_gaps": [],
+
+            "projection_method":
+                "No requirements were detected.",
+
+            "projection_note":
+                "There are no requirements available for projection."
 
         }
+
+    # --------------------------------------------------------
+    # CURRENT SCORE
+    # --------------------------------------------------------
 
     current_points = sum(
 
         status_points(
-            item["status"]
+            item.get("status", "MISSING")
         )
 
         for item in results
@@ -2074,68 +2083,90 @@ def calculate_projected_fit(results):
     current_score = round(
 
         current_points /
-        total
-        * 100,
+        total *
+        100,
 
         1
 
     )
 
+    # --------------------------------------------------------
+    # ALL NON-MATCH REQUIREMENTS
+    #
+    # For the maximum-potential scenario, every PARTIAL
+    # and MISSING requirement is assumed to become MATCH.
+    # --------------------------------------------------------
+
     developable = []
 
     for item in results:
 
-        requirement = item["requirement"]
-
-        if (
-
-            item["status"] != "MATCH"
-
-            and
-
-            requirement in DEVELOPMENT_GUIDANCE
-
-        ):
-
-            gain = (
-
-                1.0 -
-
-                status_points(
-                    item["status"]
-                )
-
-            )
-
-            developable.append({
-
-                "item":
-                    item,
-
-                "gain":
-                    gain
-
-            })
-
-    projected_points = (
-
-        current_points +
-
-        sum(
-            item["gain"]
-            for item in developable
+        status = item.get(
+            "status",
+            "MISSING"
         )
+
+        if status == "MATCH":
+            continue
+
+        requirement = item.get(
+            "requirement",
+            ""
+        )
+
+        if not requirement:
+            continue
+
+        current_points_for_item = status_points(
+            status
+        )
+
+        gain = (
+            1.0 -
+            current_points_for_item
+        )
+
+        developable.append({
+
+            "item": item,
+
+            "gain": gain
+
+        })
+
+    # --------------------------------------------------------
+    # PROJECTED SCORE
+    #
+    # If ALL currently missing/partial requirements become
+    # MATCH, every requirement receives 1 point.
+    # Therefore maximum projected fit = 100%.
+    # --------------------------------------------------------
+
+    projected_points = current_points + sum(
+
+        item["gain"]
+
+        for item in developable
 
     )
 
     projected_score = round(
 
         projected_points /
-        total
-        * 100,
+        total *
+        100,
 
         1
 
+    )
+
+    # Safety clamp
+    projected_score = min(
+        100.0,
+        max(
+            current_score,
+            projected_score
+        )
     )
 
     improvement = round(
@@ -2147,17 +2178,85 @@ def calculate_projected_fit(results):
 
     )
 
+    # --------------------------------------------------------
+    # DEVELOPMENT ITEMS
+    # --------------------------------------------------------
+
     development_items = []
 
     for candidate in developable:
 
         item = candidate["item"]
 
-        requirement = item["requirement"]
+        requirement = item.get(
+            "requirement",
+            ""
+        )
 
-        guidance = DEVELOPMENT_GUIDANCE[
-            requirement
-        ]
+        category = item.get(
+            "category",
+            "General"
+        )
+
+        status = item.get(
+            "status",
+            "MISSING"
+        )
+
+        # Use detailed guidance when available
+        if requirement in DEVELOPMENT_GUIDANCE:
+
+            guidance = DEVELOPMENT_GUIDANCE[
+                requirement
+            ]
+
+            title = guidance.get(
+                "title",
+                requirement.title()
+            )
+
+            develop = guidance.get(
+                "develop",
+                f"Build practical evidence for {requirement}."
+            )
+
+            reason = guidance.get(
+                "reason",
+                "This requirement is not fully evidenced in the resume."
+            )
+
+            item_type = guidance.get(
+                "type",
+                "SKILL"
+            )
+
+        # Generic fallback for skills that do not yet
+        # have an entry in DEVELOPMENT_GUIDANCE
+        else:
+
+            title = requirement.title()
+
+            develop = (
+                f"Learn {title}, practice it through "
+                f"a practical project, and add clear "
+                f"evidence of the skill to your resume."
+            )
+
+            reason = (
+                f"{title} is required by the job description "
+                f"but the resume does not provide complete "
+                f"direct evidence."
+            )
+
+            item_type = (
+                "SKILL"
+                if category in {
+                    "Required Skills",
+                    "Preferred Skills",
+                    "Technical Skill"
+                }
+                else category.upper()
+            )
 
         development_items.append({
 
@@ -2165,22 +2264,22 @@ def calculate_projected_fit(results):
                 requirement,
 
             "title":
-                guidance["title"],
+                title,
 
             "category":
-                item["category"],
+                category,
 
             "current_status":
-                item["status"],
+                status,
 
             "develop":
-                guidance["develop"],
+                develop,
 
             "reason":
-                guidance["reason"],
+                reason,
 
             "type":
-                guidance["type"],
+                item_type,
 
             "point_gain":
                 candidate["gain"],
@@ -2190,33 +2289,14 @@ def calculate_projected_fit(results):
 
         })
 
+    # --------------------------------------------------------
+    # REMAINING GAPS
+    #
+    # There are no remaining gaps in the maximum-potential
+    # scenario because all current gaps are assumed completed.
+    # --------------------------------------------------------
+
     remaining = []
-
-    for item in results:
-
-        if item["status"] == "MATCH":
-            continue
-
-        if item["requirement"] not in DEVELOPMENT_GUIDANCE:
-
-            remaining.append({
-
-                "requirement":
-                    item["requirement"],
-
-                "category":
-                    item["category"],
-
-                "status":
-                    item["status"],
-
-                "reason":
-                    item.get(
-                        "audit_reason",
-                        "Additional evidence is required."
-                    )
-
-            })
 
     return {
 
@@ -2239,16 +2319,16 @@ def calculate_projected_fit(results):
             remaining,
 
         "projection_method":
-            "Scenario calculation assuming all currently "
-            "missing or partial learnable requirements become MATCH.",
+            "Scenario calculation assuming every currently "
+            "missing or partial requirement is completed "
+            "and becomes MATCH.",
 
         "projection_note":
-            "Projected Fit is an evidence-based scenario, "
-            "not a guarantee of employment or selection."
+            "Projected Fit represents the maximum scenario "
+            "if all identified requirements are satisfied. "
+            "It is not a guarantee of employment or selection."
 
     }
-
-
 # ============================================================
 # JSON EXTRACTION
 # ============================================================
