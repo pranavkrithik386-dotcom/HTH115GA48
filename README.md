@@ -1,4 +1,4 @@
-# GA-04 Resume-JD Fit Analyzer
+# Resume Fit Analyzer
 
 A simple Flask MVP for the GA-04 Explainable Candidate-Role Fit Engine.
 
@@ -47,14 +47,3 @@ POST /analyze with multipart fields:
 
 An explainable AI-powered Candidate-Role Fit Engine that analyzes resumes against job descriptions and provides evidence-backed matching, skill gaps, interview questions, career development, certifications, future scope, and job-search pathways.
 
-## 🔗 API
-
-POST `/analyze` with multipart fields:
-
-- `resume`
-- `job`
-
-## 📂 Demo Data
-
-- `data/resumes/` contains 10 synthetic resumes
-- `data/jobs/` contains 3 synthetic job descriptions
