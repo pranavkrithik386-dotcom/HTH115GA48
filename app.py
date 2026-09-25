@@ -2042,292 +2042,89 @@ def calculate_projected_fit(results):
 
     total = len(results)
 
-    if total == 0:
-
-        return {
-
-            "current_score": 0,
-
-            "projected_score": 0,
-
-            "improvement": 0,
-
-            "development_count": 0,
-
-            "development_items": [],
-
-            "remaining_gaps": [],
-
-            "projection_method":
-                "No requirements were detected.",
-
-            "projection_note":
-                "There are no requirements available for projection."
-
-        }
-
-    # --------------------------------------------------------
-    # CURRENT SCORE
-    # --------------------------------------------------------
-
     current_points = sum(
-
-        status_points(
-            item.get("status", "MISSING")
-        )
-
+        status_points(item.get("status", "MISSING"))
         for item in results
-
     )
-
-    current_score = round(
-
-        current_points /
-        total *
-        100,
-
-        1
-
-    )
-
-    # --------------------------------------------------------
-    # ALL NON-MATCH REQUIREMENTS
-    #
-    # For the maximum-potential scenario, every PARTIAL
-    # and MISSING requirement is assumed to become MATCH.
-    # --------------------------------------------------------
-
-    developable = []
-
-    for item in results:
-
-        status = item.get(
-            "status",
-            "MISSING"
-        )
-
-        if status == "MATCH":
-            continue
-
-        requirement = item.get(
-            "requirement",
-            ""
-        )
-
-        if not requirement:
-            continue
-
-        current_points_for_item = status_points(
-            status
-        )
-
-        gain = (
-            1.0 -
-            current_points_for_item
-        )
-
-        developable.append({
-
-            "item": item,
-
-            "gain": gain
-
-        })
-
-    # --------------------------------------------------------
-    # PROJECTED SCORE
-    #
-    # If ALL currently missing/partial requirements become
-    # MATCH, every requirement receives 1 point.
-    # Therefore maximum projected fit = 100%.
-    # --------------------------------------------------------
-
-    projected_points = current_points + sum(
-
-        item["gain"]
-
-        for item in developable
-
-    )
-
-    projected_score = round(
-
-        projected_points /
-        total *
-        100,
-
-        1
-
-    )
-
-    # Safety clamp
-    projected_score = min(
-        100.0,
-        max(
-            current_score,
-            projected_score
-        )
-    )
-
-    improvement = round(
-
-        projected_score -
-        current_score,
-
-        1
-
-    )
-
-    # --------------------------------------------------------
-    # DEVELOPMENT ITEMS
-    # --------------------------------------------------------
+    current_score = round(current_points / total * 100, 1) if total else 0
 
     development_items = []
 
-    for candidate in developable:
+    for item in results:
+        status = str(item.get("status", "MISSING")).upper()
+        if status == "MATCH":
+            continue
 
-        item = candidate["item"]
+        requirement = str(item.get("requirement", "")).strip()
+        if not requirement:
+            continue
 
-        requirement = item.get(
-            "requirement",
-            ""
-        )
+        category = item.get("category", "General")
+        guidance = DEVELOPMENT_GUIDANCE.get(requirement)
 
-        category = item.get(
-            "category",
-            "General"
-        )
-
-        status = item.get(
-            "status",
-            "MISSING"
-        )
-
-        # Use detailed guidance when available
-        if requirement in DEVELOPMENT_GUIDANCE:
-
-            guidance = DEVELOPMENT_GUIDANCE[
-                requirement
-            ]
-
-            title = guidance.get(
-                "title",
-                requirement.title()
-            )
-
+        if guidance:
+            title = guidance.get("title", requirement.title())
             develop = guidance.get(
                 "develop",
                 f"Build practical evidence for {requirement}."
             )
-
             reason = guidance.get(
                 "reason",
                 "This requirement is not fully evidenced in the resume."
             )
-
-            item_type = guidance.get(
-                "type",
-                "SKILL"
-            )
-
-        # Generic fallback for skills that do not yet
-        # have an entry in DEVELOPMENT_GUIDANCE
+            item_type = guidance.get("type", "SKILL")
         else:
-
             title = requirement.title()
-
             develop = (
-                f"Learn {title}, practice it through "
-                f"a practical project, and add clear "
-                f"evidence of the skill to your resume."
+                f"Learn {title}, practice it through a practical project, "
+                "and add clear evidence of the skill to your resume."
             )
-
             reason = (
-                f"{title} is required by the job description "
-                f"but the resume does not provide complete "
-                f"direct evidence."
+                f"{title} is required by the job description but the resume "
+                "does not provide complete direct evidence."
             )
-
             item_type = (
                 "SKILL"
-                if category in {
-                    "Required Skills",
-                    "Preferred Skills",
-                    "Technical Skill"
-                }
-                else category.upper()
+                if category in {"Required Skills", "Preferred Skills", "Technical Skill"}
+                else str(category).upper()
             )
 
+        current_points_for_item = status_points(status)
         development_items.append({
-
-            "requirement":
-                requirement,
-
-            "title":
-                title,
-
-            "category":
-                category,
-
-            "current_status":
-                status,
-
-            "develop":
-                develop,
-
-            "reason":
-                reason,
-
-            "type":
-                item_type,
-
-            "point_gain":
-                candidate["gain"],
-
-            "projected_status":
-                "MATCH"
-
+            "requirement": requirement,
+            "title": title,
+            "category": category,
+            "current_status": status,
+            "develop": develop,
+            "reason": reason,
+            "type": item_type,
+            "point_gain": 1.0 - current_points_for_item,
+            "projected_status": "MATCH"
         })
 
-    # --------------------------------------------------------
-    # REMAINING GAPS
-    #
-    # There are no remaining gaps in the maximum-potential
-    # scenario because all current gaps are assumed completed.
-    # --------------------------------------------------------
-
-    remaining = []
+    projected_points = sum(
+        1.0
+        for _ in results
+    )
+    projected_score = round(projected_points / total * 100, 1) if total else 0
+    improvement = round(projected_score - current_score, 1)
 
     return {
-
-        "current_score":
-            current_score,
-
-        "projected_score":
-            projected_score,
-
-        "improvement":
-            improvement,
-
-        "development_count":
-            len(development_items),
-
-        "development_items":
-            development_items,
-
-        "remaining_gaps":
-            remaining,
-
-        "projection_method":
-            "Scenario calculation assuming every currently "
-            "missing or partial requirement is completed "
-            "and becomes MATCH.",
-
-        "projection_note":
-            "Projected Fit represents the maximum scenario "
-            "if all identified requirements are satisfied. "
-            "It is not a guarantee of employment or selection."
-
+        "current_score": current_score,
+        "projected_score": projected_score,
+        "improvement": improvement,
+        "development_count": len(development_items),
+        "development_items": development_items,
+        "remaining_gaps": [],
+        "projection_method": (
+            "Scenario calculation assuming every currently missing or partial "
+            "requirement is completed and becomes MATCH."
+        ),
+        "projection_note": (
+            "Projected Fit represents the maximum scenario if all identified "
+            "requirements are satisfied. It is not a guarantee of employment "
+            "or selection."
+        )
     }
 # ============================================================
 # JSON EXTRACTION
